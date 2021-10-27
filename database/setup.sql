@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS info;
+
+CREATE TABLE info (
+    id SERIAL PRIMARY KEY NOT NULL, 
+    website VARCHAR(128) NOT NULL, 
+    password_hash VARCHAR(64) NOT NULL
+)
