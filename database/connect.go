@@ -10,10 +10,10 @@ import (
 
 // Make table if it doesn't yet exist
 func MakeTable(db *sql.DB) error {
-	// Get the path to the SQL file
-	filepath := "./setup.sql"
+	// Get the path to the SQL file, using "/database" since I guess filepath is relative and we are executing the program from main
+	path := "./database/setup.sql"
 	// Read the file content
-	queries, err := os.ReadFile(filepath)
+	queries, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}

@@ -30,7 +30,6 @@ func tableExists(db *sql.DB) error {
 		if makeTableErr := database.MakeTable(db); makeTableErr != nil {
 			return makeTableErr
 		}
-	} else {
 		fmt.Println("Everything done. You're good to go.")
 	}
 	return nil
@@ -46,7 +45,7 @@ func main() {
 	checkTable := tableExists(db)
 
 	if checkTable != nil {
-		log.Fatal("Couldn't make table!")
+		log.Fatal(checkTable)
 	}
 
 }
