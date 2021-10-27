@@ -1,8 +1,6 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 
 	"github.com/good-times-ahead/password-manager-go/database"
@@ -20,21 +18,6 @@ const (
 
 )
 
-// Check whether the table to use in further operations has already been created
-func tableExists(db *sql.DB) error {
-	getTable := fmt.Sprintf("select * from %s", table)
-
-	if _, tableErr := db.Query(getTable); tableErr != nil {
-		fmt.Println("First-time execution; creating table...")
-
-		if makeTableErr := database.MakeTable(db); makeTableErr != nil {
-			return makeTableErr
-		}
-		fmt.Println("Everything done. You're good to go.")
-	}
-	return nil
-}
-
 func main() {
 
 	db, connErr := database.ConnectToDB(host, port, user, password, dbname)
@@ -42,7 +25,7 @@ func main() {
 		log.Fatal("Couldn't connect to database!")
 	}
 
-	checkTable := tableExists(db)
+	checkTable := database.TableExists(db, table)
 
 	if checkTable != nil {
 		log.Fatal(checkTable)
