@@ -1,9 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/good-times-ahead/password-manager-go/database"
 	_ "github.com/lib/pq"
@@ -20,6 +20,22 @@ const (
 
 )
 
+// Check whether the table to use in further operations has already been created
+func tableExists(db *sql.DB) error {
+	getTable := fmt.Sprintf("select * from %s", table)
+
+	if _, tableErr := db.Query(getTable); tableErr != nil {
+		fmt.Println("First-time execution; creating table...")
+
+		if makeTableErr := database.MakeTable(db); makeTableErr != nil {
+			return makeTableErr
+		}
+	} else {
+		fmt.Println("Everything done. You're good to go.")
+	}
+	return nil
+}
+
 func main() {
 
 	db, connErr := database.ConnectToDB(host, port, user, password, dbname)
@@ -27,36 +43,10 @@ func main() {
 		log.Fatal("Couldn't connect to database!")
 	}
 
-	// Check whether the table has already been created
-	getTable := fmt.Sprintf("select * from %s;", table)
+	checkTable := tableExists(db)
 
-	_, tableErr := db.Query(getTable)
-	if tableErr != nil {
-		fmt.Println("First-time execution; creating table...")
-
-		if makeTableErr := database.MakeTable(db); makeTableErr != nil {
-			log.Fatal("Couldn't create table!")
-		}
-	} else {
-		fmt.Println("Everything done. You're good to go.")
+	if checkTable != nil {
+		log.Fatal("Couldn't make table!")
 	}
 
-	// makeTable := setupDB()
-	// _, err := db.Exec(string(makeTable))
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-}
-
-func setupDB() []byte {
-	//Get the path to your sql script in a os agnostic way.
-	path := "../db/setup.sql"
-	//Read the content of the file.
-	makeTable, err := os.ReadFile(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	//Execute the statements in the file using the sql driver.*/
-	return makeTable
 }
