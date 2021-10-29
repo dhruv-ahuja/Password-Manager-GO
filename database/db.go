@@ -15,7 +15,7 @@ const (
 	user     = "postgres"
 	password = "root"
 	dbname   = "passwords"
-	table    = "info" // making a constant for the table that we shall be using
+	Table    = "info" // making a constant for the table that we shall be using
 
 )
 
@@ -50,7 +50,7 @@ func ConnecttoDB() error {
 func TableExists() error {
 
 	// SQL query to run, not prone to injection attacks since we are just inserting the table name manually
-	query := fmt.Sprintf("SELECT * FROM %s", table)
+	query := fmt.Sprintf("SELECT * FROM %s", Table)
 	_, err := DB.Exec(query)
 	if err != nil {
 		// an error means that the table doesn't exist, we need to call the MakeTable function

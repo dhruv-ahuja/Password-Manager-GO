@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/good-times-ahead/password-manager-go/app"
 	"github.com/good-times-ahead/password-manager-go/database"
 	_ "github.com/lib/pq"
 )
@@ -17,5 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	app.TakeInput()
 
 }
