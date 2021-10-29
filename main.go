@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/good-times-ahead/password-manager-go/cmd"
 	"github.com/good-times-ahead/password-manager-go/database"
 	_ "github.com/lib/pq"
 )
@@ -30,5 +31,13 @@ func main() {
 	if checkTable != nil {
 		log.Fatal(checkTable)
 	}
+
+	// take user input which then determines what gets called next
+	test := cmd.SavePassword(db, table)
+
+	if test != nil {
+		log.Fatal(test)
+	}
+	// cmd.SavePassword("1")
 
 }

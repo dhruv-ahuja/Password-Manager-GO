@@ -47,6 +47,7 @@ func TableExists(db *sql.DB, table string) error {
 		}
 		// Let the user know that the table has been created
 		fmt.Println("Everything done. You're good to go.")
+		fmt.Println()
 	}
 	return nil
 }
