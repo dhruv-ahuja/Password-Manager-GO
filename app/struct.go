@@ -1,31 +1,57 @@
 package app
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/good-times-ahead/password-manager-go/database"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/joho/godotenv"
 )
 
 // Struct to store all user information
 type credentials struct {
+	ID                                 int
 	username, email, website, password string
 }
 
-// Salt and hash the password to allow storing it in the database safely
-func (c credentials) HashPassword() (string, error) {
+// Encrypt the password to allow storing it into the database safely
+func (c credentials) EncryptPassword() (string, error) {
 
-	password := c.password
-	// convert password(string) to a slice of encryptedPassword for hashing & salting.
-	// Cost(from what I understand) is the number of protective layers to add to the password
-	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err := godotenv.Load(); err != nil {
+		return "", err
+	}
+
+	password := []byte(c.password)
+	key := []byte(os.Getenv("ENC_KEY"))
+
+	//generate a new cipher using our 32 byte long key
+	generatedCipher, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
 	}
 
-	return string(encryptedPassword), nil
-	// decryptedPass := bcrypt.CompareHashAndPassword(encryptedPassword, []byte(password))
+	// GCM is a mode of operation for block ciphers
+	gcm, err := cipher.NewGCM(generatedCipher)
+	if err != nil {
+		return "", err
+	}
 
+	nonce := make([]byte, gcm.NonceSize())
+
+	//populates our byte array with a cryptographically secure sequence
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		return "", err
+	}
+
+	encryptedPassword := gcm.Seal(nonce, nonce, password, nil)
+
+	fmt.Println("encrypted password is: %s", encryptedPassword)
+
+	return "", err
 }
 
 func (c credentials) InsertIntoDB(encryptedPassword string) error {
