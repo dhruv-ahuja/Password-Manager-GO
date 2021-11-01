@@ -9,9 +9,8 @@ import (
 // View credentials for the specified website
 func ViewSavedCredentials() error {
 	// ask user for website name
-	var website string
-	fmt.Println("Enter the website to retrieve accounts for:")
-	fmt.Scanf("%s", &website)
+	askForWebsite := "Enter the website to retrieve accounts for: "
+	website := GetInput(askForWebsite)
 
 	// Get all accounts associated with the website
 	query := "SELECT * FROM info where website=$1"
@@ -49,7 +48,7 @@ func ViewSavedCredentials() error {
 
 	// Print out the results of the query
 	for _, usrInfo := range accountsList {
-		response := fmt.Sprintf("ID: %d, Website: %s, Email: %s, Username: %s, Password: %s", usrInfo.ID, usrInfo.website, usrInfo.email, usrInfo.username, usrInfo.password)
+		response := fmt.Sprintf("S.No.: %d, Website: %s, Email: %s, Username: %s, Password: %s", usrInfo.ID, usrInfo.website, usrInfo.email, usrInfo.username, usrInfo.password)
 
 		fmt.Println(response)
 

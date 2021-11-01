@@ -6,6 +6,6 @@ CREATE TABLE info (
     email VARCHAR(128),
     username VARCHAR(64), 
     encrypted_pw VARCHAR(128) NOT NULL,
-    CONSTRAINT either_field
-    CHECK (email is not null or username is not null)
+    -- CONSTRAINT either_field
+    -- CHECK (email is not null or username is not null)
 );

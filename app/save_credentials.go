@@ -1,7 +1,5 @@
 package app
 
-import "fmt"
-
 // Save credentials to the database
 func SaveCredentials() error {
 
@@ -14,19 +12,11 @@ func SaveCredentials() error {
 	// initialize the variable to save the credentials to
 	var usrInfo credentials
 
-	// Scan automatically ensures that the input isn't empty
-	// Todo: Implement better input method
-	fmt.Println(promptWebsite)
-	fmt.Scan(&usrInfo.website)
-
-	fmt.Println(promptEmail)
-	fmt.Scan(&usrInfo.email)
-
-	fmt.Println(promptUsername)
-	fmt.Scan(&usrInfo.username)
-
-	fmt.Println(promptPassword)
-	fmt.Scan(&usrInfo.password)
+	// Write user input to respective structure fields
+	usrInfo.website = GetInput(promptWebsite)
+	usrInfo.email = GetInput(promptEmail)
+	usrInfo.username = GetInput(promptUsername)
+	usrInfo.password = GetInput(promptPassword)
 
 	// encrypt the plain text password
 	encryptedPassword, err := usrInfo.EncryptPassword()

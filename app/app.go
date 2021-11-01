@@ -22,7 +22,6 @@ func TakeInput() error {
 	}
 
 	if usrInput == "2" {
-
 		return ViewSavedCredentials()
 	}
 
