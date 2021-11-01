@@ -22,12 +22,8 @@ func TakeInput() error {
 	}
 
 	if usrInput == "2" {
-		// ask user for website name
-		var website string
-		fmt.Println("Enter the website to retrieve accounts for:")
-		fmt.Scanf("%s", &website)
 
-		return ViewSavedCredentials(website)
+		return ViewSavedCredentials()
 	}
 
 	return nil

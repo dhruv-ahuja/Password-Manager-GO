@@ -7,7 +7,12 @@ import (
 )
 
 // View credentials for the specified website
-func ViewSavedCredentials(website string) error {
+func ViewSavedCredentials() error {
+	// ask user for website name
+	var website string
+	fmt.Println("Enter the website to retrieve accounts for:")
+	fmt.Scanf("%s", &website)
+
 	// Get all accounts associated with the website
 	query := "SELECT * FROM info where website=$1"
 
