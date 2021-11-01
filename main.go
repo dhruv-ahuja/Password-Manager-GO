@@ -19,6 +19,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app.TakeInput()
+	run := app.TakeInput()
+	if run != nil {
+		log.Fatal(run)
+	}
 
 }

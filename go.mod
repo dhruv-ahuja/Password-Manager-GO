@@ -6,3 +6,5 @@ require (
 	github.com/lib/pq v1.10.3
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 )
+
+require github.com/joho/godotenv v1.4.0 // indirect

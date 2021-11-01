@@ -5,7 +5,7 @@ CREATE TABLE info (
     website VARCHAR(64) NOT NULL,
     email VARCHAR(128),
     username VARCHAR(64), 
-    password_hash VARCHAR(256) NOT NULL,
+    encrypted_pw VARCHAR(128) NOT NULL,
     CONSTRAINT either_field
     CHECK (email is not null or username is not null)
 );

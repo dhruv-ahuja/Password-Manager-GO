@@ -4,6 +4,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -49,21 +51,31 @@ func (c credentials) EncryptPassword() (string, error) {
 
 	encryptedPassword := gcm.Seal(nonce, nonce, password, nil)
 
-	fmt.Println("encrypted password is: %s", encryptedPassword)
+	b64Password := base64.StdEncoding.EncodeToString(encryptedPassword)
 
-	return "", err
+	return b64Password, nil
 }
 
 func (c credentials) InsertIntoDB(encryptedPassword string) error {
 
-	// Preparing 1st half of the SQL query
-	query := fmt.Sprintf("INSERT INTO %s (website, email, username, password_hash)", database.Table)
+	query := "INSERT INTO info (website, email, username, encrypted_pw) VALUES ($1, $2, $3, $4) RETURNING *"
 
-	_, err := database.DB.Exec(query+"VALUES ($1, $2, $3, $4)", c.website, c.email, c.username, encryptedPassword)
+	row := database.DB.QueryRow(query, c.website, c.email, c.username, encryptedPassword)
 
-	if err != nil {
-		return err
+	var usrInfo credentials
+
+	if err := row.Scan(&usrInfo.ID, &usrInfo.website, &usrInfo.email, &usrInfo.username, &usrInfo.password); err != nil {
+
+		if err == sql.ErrNoRows {
+
+			return err
+		}
+
 	}
+
+	response := fmt.Sprintf("ID: %d, Website: %s, Email: %s, Username: %s, Encrypted Password: %s", usrInfo.ID, usrInfo.website, usrInfo.email, usrInfo.username, usrInfo.password)
+
+	fmt.Println(response)
 
 	fmt.Println("Saved your credentials to the database!")
 	return nil

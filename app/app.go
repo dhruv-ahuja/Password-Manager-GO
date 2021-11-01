@@ -1,6 +1,8 @@
 package app
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Take user input to dictate what function gets executed
 func TakeInput() error {

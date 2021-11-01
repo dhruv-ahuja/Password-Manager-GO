@@ -27,7 +27,7 @@ func SaveCredentials() error {
 	fmt.Println(promptPassword)
 	fmt.Scan(&usrInfo.password)
 
-	encryptedPassword, err := usrInfo.HashPassword()
+	encryptedPassword, err := usrInfo.EncryptPassword()
 	if err != nil {
 		return err
 	}
