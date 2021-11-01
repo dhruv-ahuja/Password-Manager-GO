@@ -28,6 +28,7 @@ func (c credentials) EncryptPassword() (string, error) {
 	}
 
 	password := []byte(c.password)
+	// retrieve encryption key from .env file
 	key := []byte(os.Getenv("ENC_KEY"))
 
 	//generate a new cipher using our 32 byte long key
@@ -36,7 +37,7 @@ func (c credentials) EncryptPassword() (string, error) {
 		return "", err
 	}
 
-	// GCM is a mode of operation for block ciphers
+	// GCM is a mode of operation used on block ciphers
 	gcm, err := cipher.NewGCM(generatedCipher)
 	if err != nil {
 		return "", err
@@ -51,6 +52,7 @@ func (c credentials) EncryptPassword() (string, error) {
 
 	encryptedPassword := gcm.Seal(nonce, nonce, password, nil)
 
+	// convert the slice of encrypted bytes into a base64 encrypted string to store in the database
 	b64Password := base64.StdEncoding.EncodeToString(encryptedPassword)
 
 	return b64Password, nil
@@ -79,5 +81,46 @@ func (c credentials) InsertIntoDB(encryptedPassword string) error {
 
 	fmt.Println("Saved your credentials to the database!")
 	return nil
+
+}
+
+func (c credentials) DecryptPassword(base64Password string) (string, error) {
+
+	// loading .env first
+	if err := godotenv.Load(); err != nil {
+		return "", err
+	}
+
+	// decrypting the base64 password string to retrieve our AES-encrypted password
+	encryptedPassword, err := base64.StdEncoding.DecodeString(base64Password)
+	if err != nil {
+		return "", err
+	}
+
+	// retrieve encryption key
+	key := []byte(os.Getenv("ENC_KEY"))
+
+	// generate a new cipher using our 32 byte long key
+	generatedCipher, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	gcm, err := cipher.NewGCM(generatedCipher)
+	if err != nil {
+		return "", err
+	}
+
+	nonce, ciphertext := encryptedPassword[:gcm.NonceSize()], encryptedPassword[gcm.NonceSize():]
+
+	password, err := gcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		return "", err
+	}
+
+	// write the password to the struct before returning
+	// c.password := string(password)
+
+	return string(password), nil
 
 }
