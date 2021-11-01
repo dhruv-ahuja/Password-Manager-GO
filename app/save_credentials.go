@@ -15,6 +15,7 @@ func SaveCredentials() error {
 	var usrInfo credentials
 
 	// Scan automatically ensures that the input isn't empty
+	// Todo: Implement better input method
 	fmt.Println(promptWebsite)
 	fmt.Scan(&usrInfo.website)
 
@@ -27,6 +28,7 @@ func SaveCredentials() error {
 	fmt.Println(promptPassword)
 	fmt.Scan(&usrInfo.password)
 
+	// encrypt the plain text password
 	encryptedPassword, err := usrInfo.EncryptPassword()
 	if err != nil {
 		return err
