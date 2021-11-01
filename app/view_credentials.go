@@ -1,29 +1,55 @@
 package app
 
+import (
+	"fmt"
+
+	"github.com/good-times-ahead/password-manager-go/database"
+)
+
 // View credentials for the specified website
-// func ViewCredentials(website string) error {
-// 	// Get all accounts associated with the website
-// 	query := fmt.Sprintf("SELECT * FROM %s", database.Table)
+func ViewSavedCredentials(website string) error {
+	// Get all accounts associated with the website
+	query := "SELECT * FROM info where website=$1"
 
-// 	rows, err := database.DB.Query(query+"WHERE website=$1", website)
-// 	if err != nil {
-// 		return err
-// 	}
+	rows, err := database.DB.Query(query, website)
+	if err != nil {
+		return err
+	}
 
-// 	defer rows.Close()
+	// Prepare a slice to store the retrieved credentials
+	var accountsList []credentials
 
-// 	// making a slice to store all rows' data
-// 	var accounts []credentials
+	for rows.Next() {
+		var usrInfo credentials
+		var base64Password string
 
-// 	for rows.Next() {
-// 		var usrInfo credentials
-// 		// We need to decrypt the password before we can print it out to the user
-// 		var encryptedPassword string
-// 		// Scan takes pointers to variables to write data
-// 		if err := rows.Scan(&usrInfo.ID, &usrInfo.website, &usrInfo.email, &usrInfo.username, &encryptedPassword); err != nil {
-// 			return err
-// 		}
+		// Write scanned values to credentials except the password, we need to decrypt it first
+		if err := rows.Scan(&usrInfo.ID, &usrInfo.website, &usrInfo.email, &usrInfo.username, &base64Password); err != nil {
+			return err
+		}
 
-// 	}
+		// Now, to decrypt the password
+		password, err := usrInfo.DecryptPassword(base64Password)
+		if err != nil {
+			return err
+		}
 
-// }
+		// Finally, we write the decrypted password to the credentials struct
+		usrInfo.password = password
+
+		// Append the credentials variable to accountList
+		accountsList = append(accountsList, usrInfo)
+
+	}
+
+	// Print out the results of the query
+	for _, usrInfo := range accountsList {
+		response := fmt.Sprintf("ID: %d, Website: %s, Email: %s, Username: %s, Password: %s", usrInfo.ID, usrInfo.website, usrInfo.email, usrInfo.username, usrInfo.password)
+
+		fmt.Println(response)
+
+	}
+
+	return nil
+
+}
