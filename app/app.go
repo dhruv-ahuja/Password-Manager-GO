@@ -1,7 +1,7 @@
 package app
 
 // Take user input to dictate what function gets executed
-func TakeInput() (int, error) {
+func TakeInput() error {
 
 	mainMsg := `Hello, what would you like to do today?
 1. Save a password to the DB
@@ -12,7 +12,7 @@ func TakeInput() (int, error) {
 
 	if usrInput == "1" {
 		// returning function directly since it's supposed to return an error anyway
-		return 0, SaveCredentials()
+		return SaveCredentials()
 	}
 
 	if usrInput == "2" {
@@ -31,5 +31,5 @@ func TakeInput() (int, error) {
 		return EditCredentials(website)
 	}
 
-	return 0, nil
+	return nil
 }

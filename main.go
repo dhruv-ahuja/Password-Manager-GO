@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_, run := app.TakeInput()
+	run := app.TakeInput()
 
 	if run != nil {
 		log.Fatal(run)

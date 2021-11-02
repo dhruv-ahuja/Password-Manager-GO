@@ -7,38 +7,36 @@ import (
 )
 
 // View credentials for the specified website
-func ViewSavedCredentials(website string) (int, error) {
-	// ask user for website name
-	// askForWebsite := "Enter the website to retrieve accounts for: "
-
-	// website := GetInput(askForWebsite)
-
+func ViewSavedCredentials(website string) error {
 	// Get all accounts associated with the website
 	query := "SELECT * FROM info where website=$1"
 
 	rows, err := database.DB.Query(query, website)
 
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	// Prepare a slice to store the retrieved credentials
+	// Prepare a slice to store retrieved credentials
 	var accountsList []credentials
 
 	for rows.Next() {
+
 		var usrInfo credentials
 		var base64Password string
 
 		// Write scanned values to credentials except the password, we need to decrypt it first
-		if err := rows.Scan(&usrInfo.ID, &usrInfo.website, &usrInfo.email, &usrInfo.username, &base64Password); err != nil {
-			return 0, err
+		err := rows.Scan(&usrInfo.ID, &usrInfo.website, &usrInfo.email, &usrInfo.username, &base64Password)
+
+		if err != nil {
+			return err
 		}
 
 		// Now, to decrypt the password
 		password, err := usrInfo.DecryptPassword(base64Password)
 
 		if err != nil {
-			return 0, err
+			return err
 		}
 
 		// Finally, we write the decrypted password to the credentials struct
@@ -49,22 +47,23 @@ func ViewSavedCredentials(website string) (int, error) {
 
 	}
 
-	count := len(accountsList)
-
 	// Print out the results of the query
-	if count == 0 {
+	if len(accountsList) == 0 {
 
 		fmt.Println("Sorry, no accounts saved for that website!")
 
 	} else {
 
 		for _, usrInfo := range accountsList {
-			response := fmt.Sprintf("S.No.: %d, Website: %s, Email: %s, Username: %s, Password: %s", usrInfo.ID, usrInfo.website, usrInfo.email, usrInfo.username, usrInfo.password)
 
-			fmt.Println(response)
+			response1 := fmt.Sprintf("ID No. %d, Website: %s", usrInfo.ID, usrInfo.email)
+
+			response2 := fmt.Sprintf("Email: %s, Username: %s, Password: %s", usrInfo.email, usrInfo.username, usrInfo.password)
+
+			fmt.Println(response1 + response2)
 
 		}
 	}
-	return count, nil
+	return nil
 
 }
