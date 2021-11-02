@@ -7,17 +7,19 @@ import (
 )
 
 // View credentials for the specified website
-func ViewSavedCredentials() error {
+func ViewSavedCredentials(website string) (int, error) {
 	// ask user for website name
-	askForWebsite := "Enter the website to retrieve accounts for: "
-	website := GetInput(askForWebsite)
+	// askForWebsite := "Enter the website to retrieve accounts for: "
+
+	// website := GetInput(askForWebsite)
 
 	// Get all accounts associated with the website
 	query := "SELECT * FROM info where website=$1"
 
 	rows, err := database.DB.Query(query, website)
+
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	// Prepare a slice to store the retrieved credentials
@@ -29,13 +31,14 @@ func ViewSavedCredentials() error {
 
 		// Write scanned values to credentials except the password, we need to decrypt it first
 		if err := rows.Scan(&usrInfo.ID, &usrInfo.website, &usrInfo.email, &usrInfo.username, &base64Password); err != nil {
-			return err
+			return 0, err
 		}
 
 		// Now, to decrypt the password
 		password, err := usrInfo.DecryptPassword(base64Password)
+
 		if err != nil {
-			return err
+			return 0, err
 		}
 
 		// Finally, we write the decrypted password to the credentials struct
@@ -46,14 +49,22 @@ func ViewSavedCredentials() error {
 
 	}
 
+	count := len(accountsList)
+
 	// Print out the results of the query
-	for _, usrInfo := range accountsList {
-		response := fmt.Sprintf("S.No.: %d, Website: %s, Email: %s, Username: %s, Password: %s", usrInfo.ID, usrInfo.website, usrInfo.email, usrInfo.username, usrInfo.password)
+	if count == 0 {
 
-		fmt.Println(response)
+		fmt.Println("Sorry, no accounts saved for that website!")
 
+	} else {
+
+		for _, usrInfo := range accountsList {
+			response := fmt.Sprintf("S.No.: %d, Website: %s, Email: %s, Username: %s, Password: %s", usrInfo.ID, usrInfo.website, usrInfo.email, usrInfo.username, usrInfo.password)
+
+			fmt.Println(response)
+
+		}
 	}
-
-	return nil
+	return count, nil
 
 }

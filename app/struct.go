@@ -33,12 +33,14 @@ func (c credentials) EncryptPassword() (string, error) {
 
 	//generate a new cipher using our 32 byte long key
 	generatedCipher, err := aes.NewCipher(key)
+
 	if err != nil {
 		return "", err
 	}
 
 	// GCM is a mode of operation used on block ciphers
 	gcm, err := cipher.NewGCM(generatedCipher)
+
 	if err != nil {
 		return "", err
 	}
@@ -80,6 +82,7 @@ func (c credentials) InsertIntoDB(encryptedPassword string) error {
 	fmt.Println(response)
 
 	fmt.Println("Saved your credentials to the database!")
+
 	return nil
 
 }
@@ -93,6 +96,7 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 
 	// decrypting the base64 password string to retrieve our AES-encrypted password
 	encryptedPassword, err := base64.StdEncoding.DecodeString(base64Password)
+
 	if err != nil {
 		return "", err
 	}
@@ -102,11 +106,13 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 
 	// generate a new cipher using our 32 byte long key
 	generatedCipher, err := aes.NewCipher(key)
+
 	if err != nil {
 		return "", err
 	}
 
 	gcm, err := cipher.NewGCM(generatedCipher)
+
 	if err != nil {
 		return "", err
 	}
@@ -114,6 +120,7 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 	nonce, ciphertext := encryptedPassword[:gcm.NonceSize()], encryptedPassword[gcm.NonceSize():]
 
 	password, err := gcm.Open(nil, nonce, ciphertext, nil)
+
 	if err != nil {
 		return "", err
 	}

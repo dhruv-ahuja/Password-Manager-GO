@@ -20,6 +20,7 @@ func SaveCredentials() error {
 
 	// encrypt the plain text password
 	encryptedPassword, err := usrInfo.EncryptPassword()
+
 	if err != nil {
 		return err
 	}

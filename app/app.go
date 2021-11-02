@@ -1,29 +1,35 @@
 package app
 
-import (
-	"fmt"
-)
-
 // Take user input to dictate what function gets executed
-func TakeInput() error {
+func TakeInput() (int, error) {
 
 	mainMsg := `Hello, what would you like to do today?
-1. Save a password to the DB.
-2. View a saved password.
-3. Edit a saved password.`
-	fmt.Println(mainMsg)
+1. Save a password to the DB
+2. View a saved password
+3. Edit a saved password: `
 
-	var usrInput string
-	fmt.Scanf("%s", &usrInput)
+	usrInput := GetInput(mainMsg)
 
 	if usrInput == "1" {
 		// returning function directly since it's supposed to return an error anyway
-		return SaveCredentials()
+		return 0, SaveCredentials()
 	}
 
 	if usrInput == "2" {
-		return ViewSavedCredentials()
+
+		askForWebsite := "Enter the website to retrieve accounts for: "
+		website := GetInput(askForWebsite)
+
+		return ViewSavedCredentials(website)
 	}
 
-	return nil
+	if usrInput == "3" {
+
+		askForWebsite := "Enter the website to edit credentials for: "
+		website := GetInput(askForWebsite)
+
+		return EditCredentials(website)
+	}
+
+	return 0, nil
 }

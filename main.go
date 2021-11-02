@@ -10,16 +10,19 @@ import (
 
 func main() {
 	err := database.ConnecttoDB()
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	err = database.TableExists()
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	run := app.TakeInput()
+	_, run := app.TakeInput()
+
 	if run != nil {
 		log.Fatal(run)
 	}
