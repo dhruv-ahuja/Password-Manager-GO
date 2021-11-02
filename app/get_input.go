@@ -20,17 +20,27 @@ func GetInput(argument string) string {
 		fmt.Print(argument)
 
 		usrInput, err := reader.ReadString('\n')
+		//fmt.Println(usrInput, len(usrInput))
+
 		// We want to keep re-iterating over the loop so we can leave the error as is(I think)
 		if err != nil {
 			fmt.Println("Invalid input or method!")
-			continue
 		}
 
-		if len(usrInput) != 0 {
-			return strings.TrimSpace(usrInput)
-		} else {
+		switch len(usrInput) {
+
+		case 1:
 			fmt.Println("Empty input!")
+
+		default:
+			return strings.TrimSpace(usrInput)
 		}
+
+		// if usrInput != " " {
+		// 	return strings.TrimSpace(usrInput)
+		// } else {
+		// 	fmt.Println("Empty input!")
+		// }
 
 	}
 
