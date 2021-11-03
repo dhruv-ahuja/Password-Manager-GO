@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Function to allow the user to edit credentials
@@ -73,10 +74,54 @@ func EditCredentials(website string) error {
 		return err
 	}
 
+	// Trim away spaces left behind by user and ReadString function
+	newEmail, newUsername, newPassword = strings.TrimSpace(newEmail), strings.TrimSpace(newUsername), strings.TrimSpace(newPassword)
+
 	// if no errors occur, update current values and prepare to update database entry
+	// todo: try and implement a better way of doing this
+	if newEmail != "" {
+		selection.email = newEmail
+	}
 
-	fmt.Print(newEmail, newPassword, newUsername)
-	fmt.Println()
+	if newUsername != "" {
+		selection.username = newUsername
+	}
 
+	var b64Password string
+
+	if newPassword != "" {
+
+		selection.password = newPassword
+
+		// // encrypt updated password
+		b64Password, err = selection.EncryptPassword()
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// Now, to finally save the new details
+
+	// declaring flag modifyPassword
+	modifyPassword := false
+
+	if b64Password != "" {
+		// Set b64Password as struct field only if modified (i.e., not empty)
+		selection.password = b64Password
+
+		// set modifyPassword to true
+		modifyPassword = true
+		err = selection.UpdateCredentials(modifyPassword)
+
+	} else {
+		err = selection.UpdateCredentials(modifyPassword)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	// nil means everything went as expected
 	return nil
 }
