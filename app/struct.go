@@ -131,3 +131,30 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 	return string(password), nil
 
 }
+
+// Update credentials using ID number
+func (c credentials) UpdateCredentials(modifyPassword bool) error {
+	// Since the password is the key component here, we specifically set a flag for it
+	// Update password as well if the bool is true
+	if modifyPassword {
+		query := "UPDATE info SET email = $1, username = $2, password = $3 WHERE id=$4"
+
+		_, err := database.DB.Exec(query, c.email, c.username, c.password, c.ID)
+
+		if err != nil {
+			return err
+		}
+		// Skip updating the password otherwise
+	} else {
+		query := "UPDATE info SET email = $1, username = $2 WHERE id=$3"
+
+		_, err := database.DB.Exec(query, c.email, c.username, c.ID)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+
+}
