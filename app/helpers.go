@@ -97,6 +97,7 @@ func RetrieveCredentials(query, website string) ([]credentials, error) {
 
 }
 
+// Print entries received from database queries
 func PrintEntries(accountsList []credentials) {
 
 	// print out the list of found entries
