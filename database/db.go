@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 
@@ -74,6 +75,14 @@ func MakeTable() error {
 
 	// Path to the relevant SQL file
 	path := "./database/setup.sql"
+
+	// Check for file's existence
+	_, err := os.Stat(path)
+
+	if err != nil {
+		return errors.New("setup.sql file not found or something was modified")
+	}
+
 	// Read the file content
 	queries, err := os.ReadFile(path)
 	if err != nil {

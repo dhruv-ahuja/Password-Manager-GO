@@ -11,7 +11,7 @@ import (
 // Function to allow the user to edit credentials
 func EditCredentials(website string) error {
 
-	query := "SELECT * FROM info where website=$1"
+	query := "SELECT * FROM info where website=$1 ORDER BY id ASC;"
 
 	// call the function to retrieve credentials given relevant query
 	accountsList, err := RetrieveCredentials(query, website)
