@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/good-times-ahead/password-manager-go/app"
 	"github.com/good-times-ahead/password-manager-go/auth"
@@ -10,28 +10,55 @@ import (
 )
 
 func main() {
-	err := database.ConnecttoDB()
+	err := initialize()
 
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
+}
 
-	err = database.TableExists()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func initialize() error {
+	// Check if master password exists
 	checkPassword := auth.CheckMasterPassword()
 
 	if checkPassword != nil {
-		log.Fatal(checkPassword)
+		return checkPassword
 	}
 
-	run := app.TakeInput()
+	// Ask user for master password
+	authUser := auth.AuthorizeUser()
 
-	if run != nil {
-		log.Fatal(run)
+	if authUser != nil {
+		return authUser
 	}
+
+	// Initialize connection to the database
+	initDB := database.ConnecttoDB()
+
+	if initDB != nil {
+		return initDB
+	}
+
+	// Check if our table already exists
+	checkForTable := database.TableExists()
+
+	if checkForTable != nil {
+		return checkForTable
+	}
+
+	// Finally, start the app
+	appPersist := true
+
+	for appPersist {
+		run := app.TakeInput()
+
+		if run != nil {
+			return run
+		}
+
+		fmt.Println()
+	}
+
+	return nil
 
 }

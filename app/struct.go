@@ -77,10 +77,6 @@ func (c credentials) InsertIntoDB(encryptedPassword string) error {
 
 	}
 
-	response := fmt.Sprintf("ID No.: %d, Website: %s, Email: %s, Username: %s, Encrypted Password: %s", usrInfo.ID, usrInfo.website, usrInfo.email, usrInfo.username, usrInfo.password)
-
-	fmt.Println(response)
-
 	fmt.Println("Saved your credentials to the database!")
 
 	return nil
