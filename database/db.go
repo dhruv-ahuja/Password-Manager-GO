@@ -30,6 +30,7 @@ func ConnecttoDB() error {
 
 	// Establish connection
 	db, err := sql.Open("postgres", psqlInfo)
+
 	if err != nil {
 		return err
 	}
@@ -40,7 +41,7 @@ func ConnecttoDB() error {
 	}
 
 	fmt.Println("Connected to the Database successfully!")
-	fmt.Println()
+
 	DB = db
 
 	return nil
@@ -52,11 +53,14 @@ func TableExists() error {
 
 	// SQL query to run, not prone to injection attacks since we are just inserting the table name manually
 	query := fmt.Sprintf("SELECT * FROM %s", Table)
+
 	_, err := DB.Exec(query)
+
 	if err != nil {
 		// an error means that the table doesn't exist, we need to call the MakeTable function
 		if MakeTableErr := MakeTable(); MakeTableErr != nil {
 			return MakeTableErr
+
 		}
 
 	} else {
@@ -76,17 +80,11 @@ func MakeTable() error {
 	// Path to the relevant SQL file
 	path := "./database/setup.sql"
 
-	// Check for file's existence
-	_, err := os.Stat(path)
+	// Read the file content
+	queries, err := os.ReadFile(path)
 
 	if err != nil {
 		return errors.New("setup.sql file not found or something was modified")
-	}
-
-	// Read the file content
-	queries, err := os.ReadFile(path)
-	if err != nil {
-		return err
 	}
 
 	// Convert the slice to a string since the database connector only accepts strings for queries.
