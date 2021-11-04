@@ -20,6 +20,11 @@ func EditCredentials(website string) error {
 		return err
 	}
 
+	// if accountsList is empty, return nil since there are no entries to modify
+	if len(accountsList) == 0 {
+		return nil
+	}
+
 	// Get users' input to find the entry they want to modify
 	msg := ("Enter the ID No. of the entry you want to modify: ")
 
@@ -122,6 +127,7 @@ func EditCredentials(website string) error {
 		return err
 	}
 
-	// nil means everything went as expected
+	fmt.Println("Updated your credentials successfully!")
+
 	return nil
 }

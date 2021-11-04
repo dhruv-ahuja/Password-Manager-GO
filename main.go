@@ -18,6 +18,13 @@ func main() {
 }
 
 func initialize() error {
+	// Initialize connection to the database
+	initDB := database.ConnecttoDB()
+
+	if initDB != nil {
+		return initDB
+	}
+
 	// Check if master password exists
 	checkPassword := auth.CheckMasterPassword()
 
@@ -30,13 +37,6 @@ func initialize() error {
 
 	if authUser != nil {
 		return authUser
-	}
-
-	// Initialize connection to the database
-	initDB := database.ConnecttoDB()
-
-	if initDB != nil {
-		return initDB
 	}
 
 	// Check if our table already exists

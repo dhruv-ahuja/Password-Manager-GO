@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/good-times-ahead/password-manager-go/app"
+	"github.com/good-times-ahead/password-manager-go/database"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -24,6 +25,14 @@ func CheckMasterPassword() error {
 		if makePassword != nil {
 			return errors.New("unable to create master password")
 		}
+
+		// Also create the table to use
+		makeTable := database.MakeTable()
+
+		if makeTable != nil {
+			return makeTable
+		}
+
 	}
 	// Return nil if all is well
 	return nil
