@@ -2,6 +2,7 @@ package app
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -50,7 +51,7 @@ func RetrieveCredentials(query, website string) ([]credentials, error) {
 	rows, err := database.DB.Query(query, website)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error executing query")
 	}
 
 	// Prepare a slice to store retrieved credentials
@@ -66,7 +67,7 @@ func RetrieveCredentials(query, website string) ([]credentials, error) {
 		err := rows.Scan(&usrInfo.ID, &usrInfo.website, &usrInfo.email, &usrInfo.username, &base64Password)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.New("error attempting to retrieve data from query")
 		}
 
 		// Now, to decrypt the password

@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -24,32 +25,36 @@ type credentials struct {
 func (c credentials) EncryptPassword() (string, error) {
 
 	if err := godotenv.Load(); err != nil {
-		return "", err
+		return "", errors.New("error reading from .ENV file, please check if it exists")
 	}
 
 	password := []byte(c.password)
 	// retrieve encryption key from .env file
 	key := []byte(os.Getenv("ENC_KEY"))
 
+	if len(key) != 32 {
+		return "", errors.New("'ENC_KEY' environment variable not defined properly")
+	}
+
 	//generate a new cipher using our 32 byte long key
 	generatedCipher, err := aes.NewCipher(key)
 
 	if err != nil {
-		return "", err
+		return "", errors.New("error generating cipher")
 	}
 
 	// GCM is a mode of operation used on block ciphers
 	gcm, err := cipher.NewGCM(generatedCipher)
 
 	if err != nil {
-		return "", err
+		return "", errors.New("error generating GCM")
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
 
 	//populates our byte array with a cryptographically secure sequence
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return "", err
+		return "", errors.New("error generating secured-sequence")
 	}
 
 	encryptedPassword := gcm.Seal(nonce, nonce, password, nil)
@@ -72,7 +77,7 @@ func (c credentials) InsertIntoDB(encryptedPassword string) error {
 
 		if err == sql.ErrNoRows {
 
-			return err
+			return errors.New("no results found in the database")
 		}
 
 	}
@@ -87,30 +92,34 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 
 	// loading .env first
 	if err := godotenv.Load(); err != nil {
-		return "", err
+		return "", errors.New("error reading from .ENV; please confirm it exists")
 	}
 
 	// decrypting the base64 password string to retrieve our AES-encrypted password
 	encryptedPassword, err := base64.StdEncoding.DecodeString(base64Password)
 
 	if err != nil {
-		return "", err
+		return "", errors.New("error decoding base64 encrypted password string")
 	}
 
 	// retrieve encryption key
 	key := []byte(os.Getenv("ENC_KEY"))
 
+	if len(key) != 32 {
+		return "", errors.New("'ENC_KEY' environment variable not defined properly")
+	}
+
 	// generate a new cipher using our 32 byte long key
 	generatedCipher, err := aes.NewCipher(key)
 
 	if err != nil {
-		return "", err
+		return "", errors.New("error generating cipher")
 	}
 
 	gcm, err := cipher.NewGCM(generatedCipher)
 
 	if err != nil {
-		return "", err
+		return "", errors.New("error generating GCM")
 	}
 
 	nonce, ciphertext := encryptedPassword[:gcm.NonceSize()], encryptedPassword[gcm.NonceSize():]
@@ -118,7 +127,7 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 	password, err := gcm.Open(nil, nonce, ciphertext, nil)
 
 	if err != nil {
-		return "", err
+		return "", errors.New("error attempting to decrypt AES-encrypted password")
 	}
 
 	// write the password to the struct before returning
@@ -138,7 +147,7 @@ func (c credentials) UpdateCredentials(modifyPassword bool) error {
 		_, err := database.DB.Exec(query, c.email, c.username, c.password, c.ID)
 
 		if err != nil {
-			return err
+			return errors.New("error executing query")
 		}
 		// Skip updating the password otherwise
 	} else {
@@ -147,7 +156,7 @@ func (c credentials) UpdateCredentials(modifyPassword bool) error {
 		_, err := database.DB.Exec(query, c.email, c.username, c.ID)
 
 		if err != nil {
-			return err
+			return errors.New("error executing query")
 		}
 	}
 
