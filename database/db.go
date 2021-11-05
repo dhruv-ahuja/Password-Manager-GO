@@ -12,7 +12,7 @@ import (
 // initialize the constants needed for the DB connection
 const (
 	host     = "localhost"
-	port     = 5432
+	port     = 5433
 	user     = "postgres"
 	password = "root"
 	dbname   = "passwords"
@@ -32,12 +32,12 @@ func ConnecttoDB() error {
 	db, err := sql.Open("postgres", psqlInfo)
 
 	if err != nil {
-		return err
+		return errors.New("error establishing connection to postgres, please check your parameters")
 	}
 
 	// Ping to confirm whether connection works
 	if err = db.Ping(); err != nil {
-		return err
+		return errors.New("unable to successfully ping the database")
 	}
 
 	fmt.Println("Connected to the Database successfully!")
@@ -89,7 +89,7 @@ func MakeTable() error {
 
 	// Convert the slice to a string since the database connector only accepts strings for queries.
 	if _, err := DB.Exec(string(queries)); err != nil {
-		return err
+		return errors.New("unable to make table 'info'")
 	}
 
 	fmt.Println("Everything done. You're good to go.")
