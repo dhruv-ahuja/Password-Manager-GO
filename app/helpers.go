@@ -34,6 +34,7 @@ func GetInput(argument string) string {
 
 		case 1:
 			fmt.Println("Empty input!")
+			fmt.Println()
 
 		default:
 			return strings.TrimSpace(usrInput)

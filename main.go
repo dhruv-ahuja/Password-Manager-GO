@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/good-times-ahead/password-manager-go/app"
 	"github.com/good-times-ahead/password-manager-go/auth"
@@ -13,7 +14,7 @@ func main() {
 	err := initialize()
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 
