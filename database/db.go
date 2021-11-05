@@ -12,7 +12,7 @@ import (
 // initialize the constants needed for the DB connection
 const (
 	host     = "localhost"
-	port     = 5433
+	port     = 5432
 	user     = "postgres"
 	password = "root"
 	dbname   = "passwords"
