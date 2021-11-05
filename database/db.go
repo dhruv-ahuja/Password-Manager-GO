@@ -26,7 +26,7 @@ var DB *sql.DB
 func ConnecttoDB() error {
 
 	// Prepare postgres connection parameters
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", host, port, user, password, dbname)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 	// Establish connection
 	db, err := sql.Open("postgres", psqlInfo)
