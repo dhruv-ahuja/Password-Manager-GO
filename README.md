@@ -11,7 +11,7 @@ When you first start the application you are prompted to make a master password.
 # Security 
 The master password the user creates is hashed and kept in a file in the same directory as the app. The user is prompted to enter the it when they open the application each time and their entered text is compared to the saved hash of the password. If the plaintext matches, the user is let through. 
 
-The credentials are kept in a table. The password is encrypted with the AES encryption method using an encryption key of length of 32 characters. The key is set by the user in the .env file. It is also used when decrypting the password each time to display to the user. 
+The credentials are kept in a table. The password is encrypted with the AES encryption method using an encryption key of length of 32 characters, these encrypted bytes are then converted to base64 string and saved in the database. The AES encryption key is set by the user in the .env file. It is also used when decrypting the password each time to display to the user. 
 
 # Setup
 We will be using postgres for the database so please ensure that you have it installed before proceeding.
