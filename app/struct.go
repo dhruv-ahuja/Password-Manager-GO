@@ -142,12 +142,14 @@ func (c credentials) UpdateCredentials(modifyPassword bool) error {
 	// Since the password is the key component here, we specifically set a flag for it
 	// Update password as well if the bool is true
 	if modifyPassword {
-		query := "UPDATE info SET email = $1, username = $2, password = $3 WHERE id=$4"
+		query := "UPDATE info SET email = $1, username = $2, encrypted_pw = $3 WHERE id=$4"
 
 		_, err := database.DB.Exec(query, c.email, c.username, c.password, c.ID)
 
 		if err != nil {
-			return errors.New("error executing query")
+			// return errors.New("error executing query")
+			fmt.Println("w/ password")
+			return err
 		}
 		// Skip updating the password otherwise
 	} else {
@@ -156,7 +158,9 @@ func (c credentials) UpdateCredentials(modifyPassword bool) error {
 		_, err := database.DB.Exec(query, c.email, c.username, c.ID)
 
 		if err != nil {
-			return errors.New("error executing query")
+			// return errors.New("error executing query")
+			fmt.Println("w/o password")
+			return err
 		}
 	}
 
