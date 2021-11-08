@@ -34,7 +34,7 @@ func DeleteCredentials(website string) error {
 	input, err := strconv.Atoi(usrInput)
 
 	if err != nil {
-		return err
+		return errors.New("error converting user input(string) to integer")
 	}
 
 	deletionQuery := "DELETE FROM info WHERE ID=$1"
