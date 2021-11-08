@@ -20,17 +20,17 @@ func CheckMasterPassword() error {
 
 	if err != nil {
 		// Call the function to make master password
-		makePassword := MakeMasterPassword(path)
+		err := MakeMasterPassword(path)
 
-		if makePassword != nil {
+		if err != nil {
 			return errors.New("unable to create master password")
 		}
 
 		// Also create the table to use
-		makeTable := database.MakeTable()
+		err = database.MakeTable()
 
-		if makeTable != nil {
-			return makeTable
+		if err != nil {
+			return err
 		}
 
 	}
@@ -56,7 +56,7 @@ Set a secure password and remember it since there will be no way to recover it!
 	usrInput := app.GetInput(prompt)
 
 	// Generate hashed password from the received user input
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(usrInput), 5)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(usrInput), 13)
 
 	if err != nil {
 		return err
