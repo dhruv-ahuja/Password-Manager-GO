@@ -26,7 +26,7 @@ func EditCredentials(website string) error {
 	}
 
 	// Get users' input to find the entry they want to modify
-	msg := ("Enter the ID No. of the entry you want to modify: ")
+	msg := "Enter the ID No. of the entry you want to modify: "
 
 	usrInput := GetInput(msg)
 

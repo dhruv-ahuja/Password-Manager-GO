@@ -12,6 +12,7 @@ func TakeInput() error {
 1. Save a password to the DB
 2. View a saved password
 3. Edit a saved password
+4. Delete a saved password
 0: Exit the application: `
 
 	usrInput := GetInput(mainMsg)
@@ -21,6 +22,7 @@ func TakeInput() error {
 		return SaveCredentials()
 
 	}
+
 	if usrInput == "2" {
 
 		askForWebsite := "Enter the website to retrieve accounts for: "
@@ -29,6 +31,7 @@ func TakeInput() error {
 		return ViewSavedCredentials(website)
 
 	}
+
 	if usrInput == "3" {
 
 		askForWebsite := "Enter the website to edit credentials for: "
@@ -37,6 +40,16 @@ func TakeInput() error {
 		return EditCredentials(website)
 
 	}
+
+	if usrInput == "4" {
+
+		askForWebsite := "Enter the website to delete credentials for: "
+		website := GetInput(askForWebsite)
+
+		return DeleteCredentials(website)
+
+	}
+
 	if usrInput == "0" {
 
 		os.Exit(0)
