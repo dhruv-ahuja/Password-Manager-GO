@@ -6,27 +6,33 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-)
-
-// initialize the constants needed for the DB connection
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "root"
-	dbname   = "passwords"
-	Table    = "info" // making a constant for the table that we shall be using
-
 )
 
 var DB *sql.DB
 
+const (
+	Table = "info"
+)
+
 //Connect to database
 func ConnecttoDB() error {
 
+	// load the .env file
+	if err := godotenv.Load(); err != nil {
+		return errors.New("error reading from .ENV file, please check if it exists")
+	}
+
+	// declare necessary parameters
+	host := os.Getenv("HOST")
+	port := os.Getenv("PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+
 	// Prepare postgres connection parameters
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 	// Establish connection
 	db, err := sql.Open("postgres", psqlInfo)
