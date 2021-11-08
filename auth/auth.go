@@ -77,29 +77,39 @@ Set a secure password and remember it since there will be no way to recover it!
 // Take user's master password and compare it to the stored hash, allowing or disallowing them access to the application
 func AuthorizeUser() error {
 	flag := true
+
+	// Load the hash from the file
+	path := "./master_pw"
+	hashedPassword, err := os.ReadFile(path)
+
+	if err != nil {
+		return errors.New("error encountered when attempting to read from the password file")
+	}
+
+	// Infinite loop till the user correctly enters the password
 	for flag {
 		// Take user input
 		prompt := "Enter the Master Password: "
 		usrInput := app.GetInput(prompt)
 
-		// Load the hash from the file
-		path := "./master_pw"
-		hashedPassword, err := os.ReadFile(path)
-
-		if err != nil {
-			return errors.New("error encountered when attempting to read from the password file")
-		}
-
 		// Compare hash and password
 		compare := bcrypt.CompareHashAndPassword(hashedPassword, []byte(usrInput))
 
-		switch compare {
-		case nil:
-			flag = false
+		// switch compare {
+		// case nil:
+		// 	flag = false
 
-		default:
-			fmt.Println("The passwords do not match! Try again.")
+		// default:
+		// 	fmt.Println("The passwords do not match! Try again.")
+		// } <- using a katana to cut a cucumber
+
+		if compare == nil {
+			return nil // flag = false
 		}
+
+		fmt.Println("The passwords do not match! Try again.")
+		fmt.Println()
+
 	}
 
 	return nil

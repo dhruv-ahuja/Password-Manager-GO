@@ -20,21 +20,24 @@ func TakeInput() error {
 		// returning function directly since it's supposed to return an error anyway
 		return SaveCredentials()
 
-	} else if usrInput == "2" {
+	}
+	if usrInput == "2" {
 
 		askForWebsite := "Enter the website to retrieve accounts for: "
 		website := GetInput(askForWebsite)
 
 		return ViewSavedCredentials(website)
 
-	} else if usrInput == "3" {
+	}
+	if usrInput == "3" {
 
 		askForWebsite := "Enter the website to edit credentials for: "
 		website := GetInput(askForWebsite)
 
 		return EditCredentials(website)
 
-	} else if usrInput == "0" {
+	}
+	if usrInput == "0" {
 
 		os.Exit(0)
 
