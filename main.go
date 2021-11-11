@@ -26,15 +26,18 @@ func initialize() error {
 		return initDB
 	}
 
+	// Path to hashed master password file
+	var pwFilePath = "./master_pw"
+
 	// Check if master password exists
-	checkPassword := auth.CheckMasterPassword()
+	checkPassword := auth.CheckMasterPassword(pwFilePath)
 
 	if checkPassword != nil {
 		return checkPassword
 	}
 
 	// Ask user for master password
-	authUser := auth.AuthorizeUser()
+	authUser := auth.AuthorizeUser(pwFilePath)
 
 	if authUser != nil {
 		return authUser
@@ -62,4 +65,8 @@ func initialize() error {
 
 	return nil
 
+}
+
+func Test() {
+	fmt.Println("OK")
 }

@@ -11,16 +11,13 @@ import (
 )
 
 // Check whether master password file exists already
-func CheckMasterPassword() error {
-	// Path to hashed master password file
-	path := "./master_pw"
-
+func CheckMasterPassword(pwFilePath string) error {
 	// Check for file
-	_, err := os.Open(path)
+	_, err := os.Open(pwFilePath)
 
 	if err != nil {
 		// Call the function to make master password
-		err := MakeMasterPassword(path)
+		err := MakeMasterPassword(pwFilePath)
 
 		if err != nil {
 			return errors.New("unable to create master password")
@@ -39,7 +36,7 @@ func CheckMasterPassword() error {
 
 }
 
-func MakeMasterPassword(path string) error {
+func MakeMasterPassword(pwFilePath string) error {
 
 	msg := `
 Hello and welcome to the Password Manager GO application. If you are seeing this message then this must be your first time using the application. 
@@ -63,7 +60,7 @@ Set a secure password and remember it since there will be no way to recover it!
 	}
 
 	// 0777 perms allow read write & execute for owner, groups and others
-	err = os.WriteFile(path, hashedPassword, 0777)
+	err = os.WriteFile(pwFilePath, hashedPassword, 0777)
 
 	if err != nil {
 		return err
@@ -75,12 +72,11 @@ Set a secure password and remember it since there will be no way to recover it!
 }
 
 // Take user's master password and compare it to the stored hash, allowing or disallowing them access to the application
-func AuthorizeUser() error {
+func AuthorizeUser(pwFilePath string) error {
 	flag := true
 
 	// Load the hash from the file
-	path := "./master_pw"
-	hashedPassword, err := os.ReadFile(path)
+	hashedPassword, err := os.ReadFile(pwFilePath)
 
 	if err != nil {
 		return errors.New("error encountered when attempting to read from the password file")
