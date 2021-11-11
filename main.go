@@ -54,7 +54,16 @@ func initialize() error {
 	appPersist := true
 
 	for appPersist {
-		run := app.TakeInput()
+		mainMsg := `Hello, what would you like to do?
+1. Save a password to the DB
+2. View a saved password
+3. Edit a saved password
+4. Delete a saved password
+0: Exit the application: `
+
+		usrInput := app.GetInput(mainMsg)
+
+		run := app.TakeInput(usrInput)
 
 		if run != nil {
 			return run
