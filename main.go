@@ -19,6 +19,13 @@ func main() {
 }
 
 func initialize() error {
+	// Load .env file, all loaded environment variables henceforth are available to all functions
+	err := app.LoadEnvs()
+
+	if err != nil {
+		return err
+	}
+
 	// Initialize connection to the database
 	initDB := database.ConnecttoDB()
 

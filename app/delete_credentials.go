@@ -10,7 +10,7 @@ import (
 
 // Function to allow users to delete credentials
 func DeleteCredentials(website string) error {
-
+	//"$" is postgres' equivalent of "?"
 	query := "SELECT * FROM info where website=$1 ORDER BY id ASC"
 
 	// call the function to retrieve credentials given relevant query
