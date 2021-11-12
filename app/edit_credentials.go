@@ -50,6 +50,7 @@ func EditCredentials(website string) error {
 
 	// Now, we have the users' choice of entry, allow them to edit whatever field they want
 	// Print out each field alongside the current counter-part
+	// Using bufio NewReader since GetInput function doesn't accept empty input
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Println("Your current email is: ", selection.email)

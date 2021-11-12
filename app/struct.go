@@ -4,7 +4,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"database/sql"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -12,7 +11,6 @@ import (
 	"os"
 
 	"github.com/good-times-ahead/password-manager-go/database"
-	"github.com/joho/godotenv"
 )
 
 // Struct to store all user information
@@ -23,10 +21,6 @@ type credentials struct {
 
 // Encrypt the password to allow storing it into the database safely
 func (c credentials) EncryptPassword() (string, error) {
-
-	if err := godotenv.Load(); err != nil {
-		return "", errors.New("error reading from .ENV file, please check if it exists")
-	}
 
 	password := []byte(c.password)
 	// retrieve encryption key from .env file
@@ -65,21 +59,15 @@ func (c credentials) EncryptPassword() (string, error) {
 	return b64Password, nil
 }
 
+// Reads all struct fields and inserts them into the database
 func (c credentials) InsertIntoDB(encryptedPassword string) error {
 
 	query := "INSERT INTO info (website, email, username, encrypted_pw) VALUES ($1, $2, $3, $4) RETURNING *"
 
-	row := database.DB.QueryRow(query, c.website, c.email, c.username, encryptedPassword)
+	_, err := database.DB.Exec(query, c.website, c.email, c.username, encryptedPassword)
 
-	var usrInfo credentials
-
-	if err := row.Scan(&usrInfo.ID, &usrInfo.website, &usrInfo.email, &usrInfo.username, &usrInfo.password); err != nil {
-
-		if err == sql.ErrNoRows {
-
-			return errors.New("no results found in the database")
-		}
-
+	if err != nil {
+		return errors.New("unable to save your credentials to the database")
 	}
 
 	fmt.Println("Saved your credentials to the database!")
@@ -89,11 +77,6 @@ func (c credentials) InsertIntoDB(encryptedPassword string) error {
 }
 
 func (c credentials) DecryptPassword(base64Password string) (string, error) {
-
-	// loading .env first
-	if err := godotenv.Load(); err != nil {
-		return "", errors.New("error reading from .ENV; please confirm it exists")
-	}
 
 	// decrypting the base64 password string to retrieve our AES-encrypted password
 	encryptedPassword, err := base64.StdEncoding.DecodeString(base64Password)
@@ -140,16 +123,14 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 // Update credentials using ID number
 func (c credentials) UpdateCredentials(modifyPassword bool) error {
 	// Since the password is the key component here, we specifically set a flag for it
-	// Update password as well if the bool is true
+	// Update password as well if the bool is true otherwise only update username and email
 	if modifyPassword {
 		query := "UPDATE info SET email = $1, username = $2, encrypted_pw = $3 WHERE id=$4"
 
 		_, err := database.DB.Exec(query, c.email, c.username, c.password, c.ID)
 
 		if err != nil {
-			// return errors.New("error executing query")
-			fmt.Println("w/ password")
-			return err
+			return errors.New("error executing query")
 		}
 		// Skip updating the password otherwise
 	} else {
@@ -158,9 +139,7 @@ func (c credentials) UpdateCredentials(modifyPassword bool) error {
 		_, err := database.DB.Exec(query, c.email, c.username, c.ID)
 
 		if err != nil {
-			// return errors.New("error executing query")
-			fmt.Println("w/o password")
-			return err
+			return errors.New("error executing query")
 		}
 	}
 
