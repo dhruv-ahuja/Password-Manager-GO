@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
 	"github.com/good-times-ahead/password-manager-go/app"
 	"github.com/good-times-ahead/password-manager-go/auth"
 	"github.com/good-times-ahead/password-manager-go/database"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -20,10 +22,8 @@ func main() {
 
 func initialize() error {
 	// Load .env file, all loaded environment variables henceforth are available to all functions
-	err := app.LoadEnvs()
-
-	if err != nil {
-		return err
+	if err := godotenv.Load(); err != nil {
+		return errors.New("error reading from .env file, please check")
 	}
 
 	// Initialize connection to the database

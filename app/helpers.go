@@ -8,17 +8,7 @@ import (
 	"strings"
 
 	"github.com/good-times-ahead/password-manager-go/database"
-	"github.com/joho/godotenv"
 )
-
-func LoadEnvs() error {
-	// load the .env file
-	if err := godotenv.Load(); err != nil {
-		return errors.New("error reading from .env file, please check")
-	}
-
-	return nil
-}
 
 // Function to get user input in a streamlined fashion.
 func GetInput(argument string) string {
