@@ -11,10 +11,6 @@ import (
 
 var DB *sql.DB
 
-const (
-	Table = "info"
-)
-
 //Connect to database
 func ConnecttoDB() error {
 	// declare necessary parameters
@@ -25,7 +21,7 @@ func ConnecttoDB() error {
 	dbname := os.Getenv("DB_NAME")
 
 	// Prepare postgres connection parameters
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	psqlInfo := fmt.Sprint("host=", host, " port=", port, " user=", user, " password=", password, " dbname=", dbname, " sslmode=disable")
 
 	// Establish connection
 	db, err := sql.Open("postgres", psqlInfo)
@@ -49,9 +45,8 @@ func ConnecttoDB() error {
 
 // Check whether the table to use exists or not
 func TableExists() error {
-
-	// SQL query to run, not prone to injection attacks since we are just inserting the table name manually
-	query := fmt.Sprintf("SELECT * FROM %s", Table)
+	// Returns error if table does not exist.
+	query := "SELECT 'public.info'::regclass"
 
 	_, err := DB.Exec(query)
 
