@@ -113,9 +113,6 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 		return "", errors.New("error attempting to decrypt AES-encrypted password")
 	}
 
-	// write the password to the struct before returning
-	// c.password := string(password)
-
 	return string(password), nil
 
 }
