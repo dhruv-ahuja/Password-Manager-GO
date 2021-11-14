@@ -6,56 +6,36 @@ import (
 )
 
 // Take user input to dictate what function gets executed
-func TakeInput() error {
+func TakeInput(usrInput string) error {
 
-	mainMsg := `Hello, what would you like to do?
-1. Save a password to the DB
-2. View a saved password
-3. Edit a saved password
-4. Delete a saved password
-0: Exit the application: `
+	switch usrInput {
 
-	usrInput := GetInput(mainMsg)
-
-	if usrInput == "1" {
+	case "1":
 		// returning function directly since it's supposed to return an error anyway
 		return SaveCredentials()
 
-	}
-
-	if usrInput == "2" {
-
+	case "2":
 		askForWebsite := "Enter the website to retrieve accounts for: "
 		website := GetInput(askForWebsite)
 
 		return ViewSavedCredentials(website)
 
-	}
-
-	if usrInput == "3" {
-
+	case "3":
 		askForWebsite := "Enter the website to edit credentials for: "
 		website := GetInput(askForWebsite)
 
 		return EditCredentials(website)
 
-	}
-
-	if usrInput == "4" {
-
+	case "4":
 		askForWebsite := "Enter the website to delete credentials for: "
 		website := GetInput(askForWebsite)
 
 		return DeleteCredentials(website)
 
-	}
-
-	if usrInput == "0" {
-
+	case "0":
 		os.Exit(0)
 
-	} else {
-
+	default:
 		fmt.Println("Invalid input!")
 
 	}

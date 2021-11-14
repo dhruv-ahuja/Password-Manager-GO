@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
 	"github.com/good-times-ahead/password-manager-go/app"
 	"github.com/good-times-ahead/password-manager-go/auth"
 	"github.com/good-times-ahead/password-manager-go/database"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -19,6 +21,11 @@ func main() {
 }
 
 func initialize() error {
+	// Load .env file, all loaded environment variables henceforth are available to all functions
+	if err := godotenv.Load(); err != nil {
+		return errors.New("error reading from .env file, please check")
+	}
+
 	// Initialize connection to the database
 	initDB := database.ConnecttoDB()
 
@@ -26,15 +33,18 @@ func initialize() error {
 		return initDB
 	}
 
+	// Path to hashed master password file
+	var pwFilePath = "./master_pw"
+
 	// Check if master password exists
-	checkPassword := auth.CheckMasterPassword()
+	checkPassword := auth.CheckMasterPassword(pwFilePath)
 
 	if checkPassword != nil {
 		return checkPassword
 	}
 
 	// Ask user for master password
-	authUser := auth.AuthorizeUser()
+	authUser := auth.AuthorizeUser(pwFilePath)
 
 	if authUser != nil {
 		return authUser
@@ -51,7 +61,16 @@ func initialize() error {
 	appPersist := true
 
 	for appPersist {
-		run := app.TakeInput()
+		mainMsg := `Hello, what would you like to do?
+1. Save a password to the DB
+2. View a saved password
+3. Edit a saved password
+4. Delete a saved password
+0: Exit the application: `
+
+		usrInput := app.GetInput(mainMsg)
+
+		run := app.TakeInput(usrInput)
 
 		if run != nil {
 			return run
@@ -62,4 +81,8 @@ func initialize() error {
 
 	return nil
 
+}
+
+func Test() {
+	fmt.Println("OK")
 }

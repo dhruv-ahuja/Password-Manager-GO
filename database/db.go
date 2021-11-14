@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -18,12 +17,6 @@ const (
 
 //Connect to database
 func ConnecttoDB() error {
-
-	// load the .env file
-	if err := godotenv.Load(); err != nil {
-		return errors.New("error reading from .ENV file, please check if it exists")
-	}
-
 	// declare necessary parameters
 	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")
