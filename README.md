@@ -1,5 +1,5 @@
 # Introduction
-This is my first project in Go, a password manager application. A humble attempt at execution of an idea I've had for some time now. The application can save, view and edit credentials. You can add multiple credentials for a single website. A simplistic textual interface is used to get things done.
+This is my first project in Go, a password manager application. A humble attempt at execution of an idea I've had for some time now. The application can save, view, edit and delete credentials. You can add multiple credentials for a single website. A simplistic textual interface is used to get things done.
 
 # How Does It Work
 When you first start the application you are prompted to make a master password. The app has four main functions:
