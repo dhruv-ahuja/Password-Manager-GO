@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"os"
@@ -73,8 +74,6 @@ Set a secure password and remember it since there will be no way to recover it!
 
 // Take user's master password and compare it to the stored hash, allowing or disallowing them access to the application
 func AuthorizeUser(pwFilePath string) error {
-	flag := true
-
 	// Load the hash from the file
 	hashedPassword, err := os.ReadFile(pwFilePath)
 
@@ -83,24 +82,16 @@ func AuthorizeUser(pwFilePath string) error {
 	}
 
 	// Infinite loop till the user correctly enters the password
-	for flag {
+	for true {
 		// Take user input
 		prompt := "Enter the Master Password: "
 		usrInput := app.GetInput(prompt)
 
-		// Compare hash and password
+		// Compare hash and password, returns nil if match else error
 		compare := bcrypt.CompareHashAndPassword(hashedPassword, []byte(usrInput))
 
-		// switch compare {
-		// case nil:
-		// 	flag = false
-
-		// default:
-		// 	fmt.Println("The passwords do not match! Try again.")
-		// } <- using a katana to cut a cucumber
-
 		if compare == nil {
-			return nil // flag = false
+			return nil
 		}
 
 		fmt.Println("The passwords do not match! Try again.")
@@ -110,4 +101,18 @@ func AuthorizeUser(pwFilePath string) error {
 
 	return nil
 
+}
+
+// Intended to only be used on first run
+func GenerateEncryptionKey() error {
+	// add file path to check for existing enc_key existence
+
+	// if file empty/doesn't exist, generate a new encryption key
+	encryptionKey := make([]byte, 32)
+
+	if _, err := rand.Read(encryptionKey); err != nil {
+		return err
+	}
+	fmt.Println(encryptionKey)
+	return nil
 }
