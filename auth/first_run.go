@@ -11,7 +11,9 @@ import (
 )
 
 // This file contains functions that will be executed if it is the users' run of the app
+var encInfoPath = "./encrypted_data"
 
+// Ask the user to set the master password
 func GetMasterPassword() string {
 
 	msg := `
@@ -34,7 +36,7 @@ Set a secure password and remember it since there will be no way to recover it!
 }
 
 // Argon2 is considered better than bcrypt for securing passwords
-func HashMasterPassword(masterPassword, pwFilePath string) ([]byte, []byte, error) {
+func HashMasterPassword(usrInput, pwFilePath string) ([]byte, []byte, error) {
 	// generate 32 bytes salt
 	salt := make([]byte, 32)
 
@@ -45,7 +47,7 @@ func HashMasterPassword(masterPassword, pwFilePath string) ([]byte, []byte, erro
 	}
 
 	// generate hashed password using argon2
-	hashedMasterPassword := argon2.IDKey([]byte(masterPassword), salt, 1, 64*1024, 4, 32)
+	hashedMasterPassword := argon2.IDKey([]byte(usrInput), salt, 1, 64*1024, 4, 32)
 
 	// returning salt as well as the hashed master password.
 	// the salt will be written to disk as well
@@ -96,4 +98,65 @@ func SealEncryptionKey(hashedPassword []byte, encryptionKey []byte) (*[24]byte, 
 	// returning nonce as well since we'll be writing the nonce, sealed encryption key
 	// and the salt generated with master password to disk for subsequent usage
 	return nonce, sealedEncKey, nil
+}
+
+// Save the salt, sealed encryption key and nonce to file
+func SaveEncryptionData(values [][]byte) error {
+
+	file, err := os.OpenFile(encInfoPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0777)
+
+	if err != nil {
+		return err
+	}
+
+	for _, value := range values {
+
+		if _, err := file.Write(append(value, '\n')); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+
+}
+
+func FirstRun(pwFilePath string) error {
+	// generate encryption key at the very start
+	encKey, err := GenerateEncryptionKey()
+
+	if err != nil {
+		return err
+	}
+
+	// if password doesn't exist yet
+	usrInput := GetMasterPassword()
+
+	salt, hashedPassword, err := HashMasterPassword(usrInput, pwFilePath)
+
+	if err != nil {
+		return err
+	}
+
+	savePasswordErr := SaveMasterPassword(pwFilePath, hashedPassword)
+
+	if savePasswordErr != nil {
+		return savePasswordErr
+	}
+
+	// after master password has been generated properly, we will seal our encryption key
+	nonceArray, sealedEncKey, err := SealEncryptionKey(hashedPassword, encKey)
+
+	// combine nonce, sealed key and salt into a slice
+	nonce := []byte(nonceArray[:])
+
+	values := [][]byte{salt, sealedEncKey, nonce}
+
+	saveDataErr := SaveEncryptionData(values)
+
+	if saveDataErr != nil {
+		return err
+	}
+
+	return nil
 }
