@@ -82,7 +82,7 @@ func GenerateEncryptionKey() ([]byte, error) {
 }
 
 // Seal encryption key for an added layer of protection
-func SealEncryptionKey(hashedPassword []byte, encryptionKey []byte) ([24]byte, []byte, error) {
+func SealEncryptionKey(hashedPassword []byte, encryptionKey []byte) ([]byte, error) {
 
 	// make slice to store rand's generated output
 	// generateNonce := make([]byte, 24)
@@ -90,7 +90,7 @@ func SealEncryptionKey(hashedPassword []byte, encryptionKey []byte) ([24]byte, [
 
 	// generate nonce to use with secretbox.Seal
 	if _, err := rand.Read(nonce[:]); err != nil {
-		return [24]byte{}, nil, err
+		return nil, err
 	}
 
 	// use secretbox to seal the encryption key
@@ -98,14 +98,14 @@ func SealEncryptionKey(hashedPassword []byte, encryptionKey []byte) ([24]byte, [
 
 	// returning nonce as well since we'll be writing the nonce, sealed encryption key
 	// and the salt generated with master password to disk for subsequent usage
-	return nonce, sealedEncKey, nil
+	return sealedEncKey, nil
 
 }
 
 // Save the salt, sealed encryption key and nonce to file
 func SaveEncryptionData(values [][]byte) error {
 
-	file, err := os.OpenFile(encInfoPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(encInfoPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0444)
 
 	if err != nil {
 		return err
@@ -148,12 +148,11 @@ func FirstRun(pwFilePath string) error {
 	}
 
 	// after master password has been generated properly, we will seal our encryption key
-	nonceArray, sealedEncKey, err := SealEncryptionKey(hashedPassword, encKey)
+	sealedEncKey, err := SealEncryptionKey(hashedPassword, encKey)
 
 	// combine nonce, sealed key and salt into a slice
-	nonce := []byte(nonceArray[:])
 
-	values := [][]byte{salt, sealedEncKey, nonce}
+	values := [][]byte{salt, sealedEncKey}
 
 	saveDataErr := SaveEncryptionData(values)
 
