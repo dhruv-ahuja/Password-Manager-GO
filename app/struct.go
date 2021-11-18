@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/good-times-ahead/password-manager-go/database"
 )
@@ -20,18 +19,19 @@ type credentials struct {
 }
 
 // Encrypt the password to allow storing it into the database safely
-func (c credentials) EncryptPassword() (string, error) {
+func (c credentials) EncryptPassword(encryptionKey []byte) (string, error) {
 
 	password := []byte(c.password)
-	// retrieve encryption key from .env file
-	key := []byte(os.Getenv("ENC_KEY"))
 
-	if len(key) != 32 {
-		return "", errors.New("'ENC_KEY' environment variable not defined properly")
-	}
+	// retrieve encryption key from .env file
+	// key := []byte(os.Getenv("ENC_KEY"))
+
+	// if len(key) != 32 {
+	// 	return "", errors.New("'ENC_KEY' environment variable not defined properly")
+	// }
 
 	//generate a new cipher using our 32 byte long key
-	generatedCipher, err := aes.NewCipher(key)
+	generatedCipher, err := aes.NewCipher(encryptionKey)
 
 	if err != nil {
 		return "", errors.New("error generating cipher")
@@ -76,7 +76,7 @@ func (c credentials) InsertIntoDB(encryptedPassword string) error {
 
 }
 
-func (c credentials) DecryptPassword(base64Password string) (string, error) {
+func (c credentials) DecryptPassword(base64Password string, encryptionKey []byte) (string, error) {
 
 	// decrypting the base64 password string to retrieve our AES-encrypted password
 	encryptedPassword, err := base64.StdEncoding.DecodeString(base64Password)
@@ -85,17 +85,11 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 		return "", errors.New("error decoding base64 encrypted password string")
 	}
 
-	// retrieve encryption key
-	key := []byte(os.Getenv("ENC_KEY"))
-
-	if len(key) != 32 {
-		return "", errors.New("'ENC_KEY' environment variable not defined properly")
-	}
-
 	// generate a new cipher using our 32 byte long key
-	generatedCipher, err := aes.NewCipher(key)
+	generatedCipher, err := aes.NewCipher(encryptionKey)
 
 	if err != nil {
+		fmt.Println(err)
 		return "", errors.New("error generating cipher")
 	}
 
@@ -110,6 +104,7 @@ func (c credentials) DecryptPassword(base64Password string) (string, error) {
 	password, err := gcm.Open(nil, nonce, ciphertext, nil)
 
 	if err != nil {
+		fmt.Println(err)
 		return "", errors.New("error attempting to decrypt AES-encrypted password")
 	}
 

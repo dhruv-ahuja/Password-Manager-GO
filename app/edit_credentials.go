@@ -9,12 +9,12 @@ import (
 )
 
 // Function to allow the user to edit credentials
-func EditCredentials(website string) error {
+func EditCredentials(website string, encryptionKey []byte) error {
 
 	query := "SELECT * FROM info where website=$1 ORDER BY id ASC;"
 
 	// call the function to retrieve credentials given relevant query
-	accountsList, err := RetrieveCredentials(query, website)
+	accountsList, err := RetrieveCredentials(query, website, encryptionKey)
 
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func EditCredentials(website string) error {
 		selection.password = newPassword
 
 		// // encrypt updated password
-		b64Password, err = selection.EncryptPassword()
+		b64Password, err = selection.EncryptPassword(encryptionKey)
 
 		if err != nil {
 			return err

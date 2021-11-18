@@ -6,31 +6,31 @@ import (
 )
 
 // Take user input to dictate what function gets executed
-func TakeInput(usrInput string) error {
+func TakeInput(usrInput string, encryptionKey []byte) error {
 
 	switch usrInput {
 
 	case "1":
 		// returning function directly since it's supposed to return an error anyway
-		return SaveCredentials()
+		return SaveCredentials(encryptionKey)
 
 	case "2":
 		askForWebsite := "Enter the website to retrieve accounts for: "
 		website := GetInput(askForWebsite)
 
-		return ViewSavedCredentials(website)
+		return ViewSavedCredentials(website, encryptionKey)
 
 	case "3":
 		askForWebsite := "Enter the website to edit credentials for: "
 		website := GetInput(askForWebsite)
 
-		return EditCredentials(website)
+		return EditCredentials(website, encryptionKey)
 
 	case "4":
 		askForWebsite := "Enter the website to delete credentials for: "
 		website := GetInput(askForWebsite)
 
-		return DeleteCredentials(website)
+		return DeleteCredentials(website, encryptionKey)
 
 	case "0":
 		os.Exit(0)

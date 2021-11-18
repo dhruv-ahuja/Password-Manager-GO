@@ -9,12 +9,13 @@ import (
 )
 
 // Function to allow users to delete credentials
-func DeleteCredentials(website string) error {
+func DeleteCredentials(website string, encryptionKey []byte) error {
+
 	//"$" is postgres' equivalent of "?"
 	query := "SELECT * FROM info where website=$1 ORDER BY id ASC"
 
 	// call the function to retrieve credentials given relevant query
-	accountsList, err := RetrieveCredentials(query, website)
+	accountsList, err := RetrieveCredentials(query, website, encryptionKey)
 
 	if err != nil {
 		return err

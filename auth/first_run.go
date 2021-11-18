@@ -96,8 +96,6 @@ func SealEncryptionKey(hashedPassword []byte, encryptionKey []byte) ([24]byte, [
 	// use secretbox to seal the encryption key
 	sealedEncKey := secretbox.Seal(nonce[:], encryptionKey, &nonce, (*[32]byte)(hashedPassword))
 
-	fmt.Println(nonce, len(nonce))
-
 	// returning nonce as well since we'll be writing the nonce, sealed encryption key
 	// and the salt generated with master password to disk for subsequent usage
 	return nonce, sealedEncKey, nil

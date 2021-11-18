@@ -13,11 +13,13 @@ import (
 )
 
 func main() {
+
 	err := initialize()
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func initialize() error {
@@ -34,28 +36,49 @@ func initialize() error {
 	}
 
 	// Path to hashed master password file
-	var pwFilePath = "./master_pw"
+	pwFilePath := "./master_pw"
+	// Path to encrypted data (salt, encryption key)
+	encInfoPath := "./encrypted_data"
 
 	// Check if master password exists
 	checkPassword := auth.CheckMasterPassword(pwFilePath)
 
-	if checkPassword != nil {
-		return checkPassword
+	if !checkPassword {
+		err := auth.FirstRun(pwFilePath)
+
+		if err != nil {
+			return err
+		}
 	}
 
-	// Ask user for master password
-	authUser := auth.AuthorizeUser(pwFilePath)
+	err := auth.Run(pwFilePath)
 
-	if authUser != nil {
-		return authUser
+	if err != nil {
+		return err
 	}
 
 	// Check if our table already exists
-	checkForTable := database.TableExists()
+	checkTableErr := database.TableExists()
 
-	if checkForTable != nil {
-		return checkForTable
+	if checkTableErr != nil {
+		return checkTableErr
 	}
+
+	// load encrypted data to use when dealing with credentials later
+	encData, err := auth.LoadEncryptedInfo(encInfoPath)
+
+	if err != nil {
+		return err
+	}
+
+	// now, to unseal the encryption key
+	encryptionKey, err := auth.UnsealEncryptionKey(pwFilePath, encData)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(encryptionKey)
 
 	// Finally, start the app
 	appPersist := true
@@ -70,10 +93,10 @@ func initialize() error {
 
 		usrInput := app.GetInput(mainMsg)
 
-		run := app.TakeInput(usrInput)
+		executeAppErr := app.TakeInput(usrInput, encryptionKey)
 
-		if run != nil {
-			return run
+		if executeAppErr != nil {
+			return executeAppErr
 		}
 
 		fmt.Println()

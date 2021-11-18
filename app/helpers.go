@@ -23,7 +23,6 @@ func GetInput(argument string) string {
 		fmt.Print(argument)
 
 		usrInput, err := reader.ReadString('\n')
-		//fmt.Println(usrInput, len(usrInput))
 
 		// We want to keep re-iterating over the loop so we can leave the error as is(I think)
 		if err != nil {
@@ -35,9 +34,9 @@ func GetInput(argument string) string {
 		case 1:
 			fmt.Println("Empty input!")
 			fmt.Println()
-
 		default:
 			return strings.TrimSpace(usrInput)
+
 		}
 
 	}
@@ -47,7 +46,7 @@ func GetInput(argument string) string {
 }
 
 // Function to retrieve specific data from the table
-func RetrieveCredentials(query, website string) ([]credentials, error) {
+func RetrieveCredentials(query, website string, encryptionKey []byte) ([]credentials, error) {
 
 	rows, err := database.DB.Query(query, website)
 
@@ -72,7 +71,7 @@ func RetrieveCredentials(query, website string) ([]credentials, error) {
 		}
 
 		// Now, to decrypt the password
-		password, err := usrInfo.DecryptPassword(base64Password)
+		password, err := usrInfo.DecryptPassword(base64Password, encryptionKey)
 
 		if err != nil {
 			return nil, err

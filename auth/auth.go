@@ -137,6 +137,7 @@ func UnsealEncryptionKey(pwFilePath string, values [][]byte) ([]byte, error) {
 		return nil, errors.New("error when trying to read master password file, please check")
 	}
 
+	// the main data is stored from the 25th byte onwards
 	encKey, ok := secretbox.Open(nil, sealedKey[24:], &nonce, (*[32]byte)(hashedPassword))
 
 	if !ok {
@@ -158,7 +159,7 @@ func Run(pwFilePath string) error {
 		return err
 	}
 
-	UnsealEncryptionKey(pwFilePath, values)
+	// UnsealEncryptionKey(pwFilePath, values)
 
 	return nil
 

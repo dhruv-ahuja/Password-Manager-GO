@@ -1,7 +1,7 @@
 package app
 
 // Save credentials to the database
-func SaveCredentials() error {
+func SaveCredentials(encryptionKey []byte) error {
 
 	// define needed prompts
 	promptWebsite := "Enter the websites' name: "
@@ -19,7 +19,7 @@ func SaveCredentials() error {
 	usrInfo.password = GetInput(promptPassword)
 
 	// encrypt the plain text password
-	encryptedPassword, err := usrInfo.EncryptPassword()
+	encryptedPassword, err := usrInfo.EncryptPassword(encryptionKey)
 
 	if err != nil {
 		return err
