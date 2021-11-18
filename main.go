@@ -40,21 +40,25 @@ func initialize() error {
 	// Path to encrypted data (salt, encryption key)
 	encInfoPath := "./encrypted_data"
 
-	// Check if master password exists
-	checkPassword := auth.CheckMasterPassword(pwFilePath)
+	// Check whether encrypted data already exists
+	checkEncData := auth.CheckEncryptedData(encInfoPath)
 
-	if !checkPassword {
-		err := auth.FirstRun(pwFilePath)
+	if !checkEncData {
+
+		// Drop any existing table and start afresh
+		err := database.MakeTable()
 
 		if err != nil {
 			return err
 		}
-	}
 
-	err := auth.Run(pwFilePath)
+		// Execute "first-run" functions
+		err = auth.FirstRun(pwFilePath)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
+
 	}
 
 	// Check if our table already exists
@@ -62,6 +66,12 @@ func initialize() error {
 
 	if checkTableErr != nil {
 		return checkTableErr
+	}
+
+	err := auth.Run(pwFilePath)
+
+	if err != nil {
+		return err
 	}
 
 	// load encrypted data to use when dealing with credentials later

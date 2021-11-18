@@ -12,11 +12,32 @@ import (
 	"golang.org/x/crypto/nacl/secretbox"
 )
 
+func CheckEncryptedData(encInfoPath string) bool {
+
+	// Check for file's existence, returns an error if unable to open
+	checkFile, err := os.OpenFile(encInfoPath, os.O_RDONLY, 0444)
+
+	if err != nil {
+		return false
+	}
+
+	isEmpty, err := checkFile.Read(make([]byte, 64))
+
+	// If not, return false since either the file has been tampered with
+	if err != nil || isEmpty == 0 {
+		return false
+	}
+
+	return true
+
+}
+
 // Check whether master password file exists already
 func CheckMasterPassword(pwFilePath string) bool {
 
 	// Check for file's existence, returns an error if unable to open
-	checkFile, err := os.OpenFile(pwFilePath, os.O_RDONLY, 0777)
+	checkFile, err := os.OpenFile(pwFilePath, os.O_RDONLY, 0444)
+
 	if err != nil {
 		return false
 	}
@@ -60,8 +81,6 @@ func LoadEncryptedInfo(encInfoPath string) ([][]byte, error) {
 			salt = []byte(scanner.Text())
 		case 2:
 			sealedKey = []byte(scanner.Text())
-		case 3:
-			nonce = []byte(scanner.Text())
 		default:
 			break
 
@@ -139,6 +158,8 @@ func UnsealEncryptionKey(pwFilePath string, values [][]byte) ([]byte, error) {
 
 	// the main data is stored from the 25th byte onwards
 	encKey, ok := secretbox.Open(nil, sealedKey[24:], &nonce, (*[32]byte)(hashedPassword))
+
+	// fmt.Println(encKey, sealedKey)
 
 	if !ok {
 		return nil, errors.New("error while unsealing encryption key")
