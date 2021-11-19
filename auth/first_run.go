@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/good-times-ahead/password-manager-go/app"
 	"golang.org/x/crypto/argon2"
@@ -27,12 +28,50 @@ Set a secure password and remember it since there will be no way to recover it!
 
 	// get users' desired master password in plain text, will be hashed later
 	// use App packages' GetInput function
-	prompt := "Enter the Master Password: "
+	usrInput := ""
 
-	usrInput := app.GetInput(prompt)
+	for true {
+
+		prompt := "Enter desired Master Password(should contain a combination of atleast 1 lowercase, 1 uppercase letter and a number; minimum length: 8 characters): "
+
+		usrInput = app.GetInput(prompt)
+
+		checkInput := CheckPasswordStrength(usrInput)
+
+		if !checkInput {
+			fmt.Println("Doesn't match required parameters! Please try again.")
+			fmt.Println("")
+		}
+		break
+	}
 
 	return usrInput
 
+}
+
+// CheckPasswordStrength checks the strength of the user-entered input for master password
+func CheckPasswordStrength(usrInput string) bool {
+
+	lowercase := "abcdefghijklmnopqrstuvwxyz"
+	uppercase := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	nums := "0123456789"
+
+	switch true {
+
+	case !strings.ContainsAny(lowercase, usrInput):
+		break
+	case !strings.ContainsAny(uppercase, usrInput):
+		break
+	case !strings.ContainsAny(nums, usrInput):
+		break
+	case len(usrInput) < 8:
+		break
+	default:
+		return true
+
+	}
+
+	return false
 }
 
 // Argon2 is considered better than bcrypt for securing passwords

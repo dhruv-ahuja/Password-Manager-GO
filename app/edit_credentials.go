@@ -38,7 +38,7 @@ func EditCredentials(website string, encryptionKey []byte) error {
 	}
 
 	// Preparing struct variable to store users' desired entry
-	var selection credentials
+	var selection Credentials
 
 	for _, usrInfo := range accountsList {
 		if input == usrInfo.ID {

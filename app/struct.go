@@ -13,13 +13,13 @@ import (
 )
 
 // Struct to store all user information
-type credentials struct {
+type Credentials struct {
 	ID                                 int
 	username, email, website, password string
 }
 
 // Encrypt the password to allow storing it into the database safely
-func (c credentials) EncryptPassword(encryptionKey []byte) (string, error) {
+func (c Credentials) EncryptPassword(encryptionKey []byte) (string, error) {
 
 	password := []byte(c.password)
 
@@ -60,7 +60,7 @@ func (c credentials) EncryptPassword(encryptionKey []byte) (string, error) {
 }
 
 // Reads all struct fields and inserts them into the database
-func (c credentials) InsertIntoDB(encryptedPassword string) error {
+func (c Credentials) InsertIntoDB(encryptedPassword string) error {
 
 	query := "INSERT INTO info (website, email, username, encrypted_pw) VALUES ($1, $2, $3, $4) RETURNING *"
 
@@ -76,7 +76,7 @@ func (c credentials) InsertIntoDB(encryptedPassword string) error {
 
 }
 
-func (c credentials) DecryptPassword(base64Password string, encryptionKey []byte) (string, error) {
+func (c Credentials) DecryptPassword(base64Password string, encryptionKey []byte) (string, error) {
 
 	// decrypting the base64 password string to retrieve our AES-encrypted password
 	encryptedPassword, err := base64.StdEncoding.DecodeString(base64Password)
@@ -113,7 +113,7 @@ func (c credentials) DecryptPassword(base64Password string, encryptionKey []byte
 }
 
 // Update credentials using ID number
-func (c credentials) UpdateCredentials(modifyPassword bool) error {
+func (c Credentials) UpdateCredentials(modifyPassword bool) error {
 	// Since the password is the key component here, we specifically set a flag for it
 	// Update password as well if the bool is true otherwise only update username and email
 	if modifyPassword {

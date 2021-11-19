@@ -10,7 +10,7 @@ func SaveCredentials(encryptionKey []byte) error {
 	promptPassword := "Enter your password(it will be encrypted before saving): "
 
 	// initialize the variable to save the credentials to
-	var usrInfo credentials
+	var usrInfo Credentials
 
 	// Write user input to respective structure fields
 	usrInfo.website = GetInput(promptWebsite)

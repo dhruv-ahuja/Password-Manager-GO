@@ -46,7 +46,7 @@ func GetInput(argument string) string {
 }
 
 // Function to retrieve specific data from the table
-func RetrieveCredentials(query, website string, encryptionKey []byte) ([]credentials, error) {
+func RetrieveCredentials(query, website string, encryptionKey []byte) ([]Credentials, error) {
 
 	rows, err := database.DB.Query(query, website)
 
@@ -55,11 +55,11 @@ func RetrieveCredentials(query, website string, encryptionKey []byte) ([]credent
 	}
 
 	// Prepare a slice to store retrieved credentials
-	var accountsList []credentials
+	var accountsList []Credentials
 
 	for rows.Next() {
 
-		var usrInfo credentials
+		var usrInfo Credentials
 		var base64Password string
 
 		// Write scanned values to credentials struct except for the password,
@@ -99,7 +99,7 @@ func RetrieveCredentials(query, website string, encryptionKey []byte) ([]credent
 }
 
 // Print entries received from database queries
-func PrintEntries(accountsList []credentials) {
+func PrintEntries(accountsList []Credentials) {
 
 	// print out the list of found entries
 	for _, usrInfo := range accountsList {
