@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"syscall"
 
 	"github.com/good-times-ahead/password-manager-go/database"
+	"golang.org/x/term"
 )
 
 // Function to get user input in a streamlined fashion.
@@ -35,6 +37,7 @@ func GetInput(argument string) string {
 			fmt.Println("Empty input!")
 			fmt.Println()
 		default:
+			fmt.Println()
 			return strings.TrimSpace(usrInput)
 
 		}
@@ -42,6 +45,38 @@ func GetInput(argument string) string {
 	}
 
 	return ""
+
+}
+
+// GetPassInput takes input using term.ReadPassword(), preventing user input echo
+func GetPassInput(argument string) []byte {
+
+	// Emulate a while loop to receive user input and ensure its' validity
+	isEmpty := true
+
+	for isEmpty {
+
+		fmt.Print(argument)
+
+		usrInput, err := term.ReadPassword(int(syscall.Stdin))
+
+		if err != nil {
+			fmt.Println("Invalid input or method!")
+		}
+
+		switch len(usrInput) {
+
+		case 0:
+			fmt.Println("Empty input!")
+			fmt.Println()
+		default:
+			return usrInput
+
+		}
+
+	}
+
+	return nil
 
 }
 
@@ -109,6 +144,7 @@ func PrintEntries(accountsList []Credentials) {
 		response2 := fmt.Sprintf("Email: %s, Username: %s, Password: %s", usrInfo.email, usrInfo.username, usrInfo.password)
 
 		fmt.Println(response1 + response2)
+		fmt.Println()
 
 	}
 }

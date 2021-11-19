@@ -108,7 +108,9 @@ func AuthorizeUser(pwFilePath string, values [][]byte) error {
 
 		// Take user input
 		prompt := "Enter the Master Password: "
-		usrInput := app.GetInput(prompt)
+		usrPassword := app.GetPassInput(prompt)
+		// convert the received slice of bytes to string
+		usrInput := string(usrPassword)
 
 		compare := argon2.IDKey([]byte(usrInput), values[0], 1, 64*1024, 4, 32)
 

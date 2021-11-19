@@ -14,7 +14,7 @@ import (
 // This file contains functions that will be executed if it is the users' run of the app
 var encInfoPath = "./encrypted_data"
 
-// Ask the user to set the master password
+// Ask the user to enter their master password
 func GetMasterPassword() string {
 
 	msg := `
@@ -27,22 +27,27 @@ Set a secure password and remember it since there will be no way to recover it!
 	fmt.Println(msg)
 
 	// get users' desired master password in plain text, will be hashed later
-	// use App packages' GetInput function
-	usrInput := ""
+	// use App packages' GetPassInput function
+	var usrInput string
 
 	for true {
 
 		prompt := "Enter desired Master Password(should contain a combination of atleast 1 lowercase, 1 uppercase letter and a number; minimum length: 8 characters): "
 
-		usrInput = app.GetInput(prompt)
+		usrPassword := app.GetPassInput(prompt)
+		usrInput = string(usrPassword)
 
 		checkInput := CheckPasswordStrength(usrInput)
 
 		if !checkInput {
+
 			fmt.Println("Doesn't match required parameters! Please try again.")
 			fmt.Println("")
+
+		} else {
+			break
 		}
-		break
+
 	}
 
 	return usrInput

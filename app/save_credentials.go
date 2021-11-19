@@ -16,7 +16,7 @@ func SaveCredentials(encryptionKey []byte) error {
 	usrInfo.website = GetInput(promptWebsite)
 	usrInfo.email = GetInput(promptEmail)
 	usrInfo.username = GetInput(promptUsername)
-	usrInfo.password = GetInput(promptPassword)
+	usrInfo.password = string(GetPassInput(promptPassword))
 
 	// encrypt the plain text password
 	encryptedPassword, err := usrInfo.EncryptPassword(encryptionKey)
