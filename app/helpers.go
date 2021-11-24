@@ -56,7 +56,7 @@ func GetPassInput(argument string) []byte {
 
 	for isEmpty {
 
-		fmt.Print(argument)
+		fmt.Println(argument)
 
 		usrInput, err := term.ReadPassword(int(syscall.Stdin))
 
