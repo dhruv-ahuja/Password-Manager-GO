@@ -34,8 +34,7 @@ func GetInput(argument string) string {
 		switch len(usrInput) {
 
 		case 1:
-			fmt.Println("Empty input!")
-			fmt.Println()
+			fmt.Printf("Empty input!\n\n")
 		default:
 			fmt.Println()
 			return strings.TrimSpace(usrInput)
@@ -67,8 +66,7 @@ func GetPassInput(argument string) []byte {
 		switch len(usrInput) {
 
 		case 0:
-			fmt.Println("Empty input!")
-			fmt.Println()
+			fmt.Printf("Empty input!\n\n")
 		default:
 			return usrInput
 

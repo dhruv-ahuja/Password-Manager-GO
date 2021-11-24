@@ -106,7 +106,7 @@ func initialize() error {
 		if err != nil {
 			return err
 		}
-
+		// adding new lines to keep the interface clean and readable
 		fmt.Println()
 	}
 

@@ -124,8 +124,8 @@ func AuthorizeUser(pwFilePath string, values [][]byte) error {
 			return nil
 		}
 
-		fmt.Println("The passwords do not match! Try again.")
-		fmt.Println()
+		// adding new lines to keep the interface clean and readable
+		fmt.Printf("The passwords do not match! Try again.\n\n")
 
 	}
 

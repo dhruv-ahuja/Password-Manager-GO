@@ -106,8 +106,7 @@ func SaveMasterPassword(pwFilePath string, hashedMasterPassword []byte) error {
 		return err
 	}
 
-	fmt.Println()
-	fmt.Println("Successfully saved master password to file! Now you will be asked to enter it each time you run the program.")
+	fmt.Println("\nSuccessfully saved master password to file! Now you will be asked to enter it each time you run the program.")
 
 	return nil
 

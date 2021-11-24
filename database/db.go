@@ -58,8 +58,8 @@ func TableExists() error {
 		}
 
 	} else {
-		fmt.Println("Found existing table. Good to go!")
-		fmt.Println()
+		// adding new lines to keep the interface clean and readable
+		fmt.Printf("Found existing table. Good to go!\n\n")
 	}
 
 	return nil
@@ -86,8 +86,8 @@ func MakeTable() error {
 		return errors.New("unable to make table 'info'")
 	}
 
-	fmt.Println("Everything done. You're good to go.")
-	fmt.Println()
+	// adding new lines to keep the interface clean and readable
+	fmt.Printf("Everything done. You're good to go.\n\n")
 
 	return nil
 
