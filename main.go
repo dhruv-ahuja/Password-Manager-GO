@@ -29,10 +29,10 @@ func initialize() error {
 	}
 
 	// Initialize connection to the database
-	initDB := database.ConnecttoDB()
+	err := database.ConnecttoDB()
 
-	if initDB != nil {
-		return initDB
+	if err != nil {
+		return err
 	}
 
 	// Path to hashed master password file
@@ -68,7 +68,7 @@ func initialize() error {
 		return checkTableErr
 	}
 
-	err := auth.Run(pwFilePath)
+	err = auth.Run(pwFilePath)
 
 	if err != nil {
 		return err
@@ -101,10 +101,10 @@ func initialize() error {
 
 		usrInput := app.GetInput(mainMsg)
 
-		executeAppErr := app.TakeInput(usrInput, encryptionKey)
+		err := app.TakeInput(usrInput, encryptionKey)
 
-		if executeAppErr != nil {
-			return executeAppErr
+		if err != nil {
+			return err
 		}
 
 		fmt.Println()

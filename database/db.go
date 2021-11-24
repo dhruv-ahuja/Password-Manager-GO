@@ -52,8 +52,8 @@ func TableExists() error {
 
 	if err != nil {
 		// an error means that the table doesn't exist, we need to call the MakeTable function
-		if MakeTableErr := MakeTable(); MakeTableErr != nil {
-			return MakeTableErr
+		if err := MakeTable(); err != nil {
+			return err
 
 		}
 

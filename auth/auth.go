@@ -62,7 +62,7 @@ func LoadEncryptedInfo(encInfoPath string) ([][]byte, error) {
 		return nil, errors.New("error reading from encrypted data file, please check")
 	}
 
-	defer file.Close()
+	// defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 
@@ -90,7 +90,8 @@ func LoadEncryptedInfo(encInfoPath string) ([][]byte, error) {
 
 	values := [][]byte{salt, sealedKey, nonce}
 
-	return values, nil
+	// returning file.Close() since the function will return an error. Deferring it means ignoring any errors that might occur, which can lead to data loss while the program continues functioning under the assumption that everything went well.
+	return values, file.Close()
 }
 
 // Take users' master password input and compare it to the stored hash, allowing access if match
