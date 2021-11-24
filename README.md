@@ -10,16 +10,19 @@ When you first start the application you are prompted to make a master password.
 4) Deleting saved credentials 
 
 # Security 
-The master password the user creates is hashed and kept in a file in the same directory as the app. The user is prompted to enter the it when they open the application each time and their entered text is compared to the saved hash of the password. If the plaintext matches, the user is let through. 
+The master password the user creates is hashed and saved to disk. The user is prompted to re-enter the master password each time they open the application and their entered text is compared to the saved hash of the password. The user is let through if the entry matches the hash. 
 
-The credentials are kept in a table. The password is encrypted with the AES encryption method using an encryption key of length of 32 characters, these encrypted bytes are then converted to base64 string and saved in the database. The AES encryption key is set by the user in the .env file. It is also used when decrypting the password each time to display to the user. 
+User credentials are kept in the table "info", with the password being secured by an encryption key. 
+
+The encryption key is 32 bytes long generated using the GO library's "crypto/rand" package. It is then sealed using a 24 byte long nonce and master password hash. The sealed output is finally saved to disk, ready for future use.
+The encryption key's purpose is to encrypt and subsequently decrypt passwords being saved to the database.  
 
 # Setup
 We will be using PostgreSQL for the database so please ensure that you have it installed before proceeding.
 
-You need to set an "ENC_KEY" variable inside a .env file that acts as the encryption key and will be used in encryption and decryption of passwords. A sample .env.example file is included. Please remember that the ENC_KEY must be 32 characters long. While making the .env file, also set the other environment variables needed for connecting to the database. If you decide that you do not want the databases' name to be "passwords", change it to the name of your choice opposite the "DB_NAME" variable. 
+Create a .env file and set the environment variables using the ".env.example" file included in the project. If you decide that you do not want the databases' name to be "passwords", change it to the name of your choice opposite the "DB_NAME" variable. 
 
-Once done with the .env file, go ahead and create a database for the application. The table will be created automatically once you make a master password. 
+Once done with the .env file, go ahead and create a database for the application. The table will be created automatically alongside the master password and encryption key on application first run.
 
 Finally, open your terminal and use the command in the project directory: ```go run main.go```
 
