@@ -15,11 +15,13 @@ import (
 func CheckEncryptedData(encInfoPath string) bool {
 
 	// Check for file's existence, returns an error if unable to open
-	checkFile, err := os.OpenFile(encInfoPath, os.O_RDONLY, 0444)
+	checkFile, err := os.Open(encInfoPath)
 
 	if err != nil {
 		return false
 	}
+
+	defer checkFile.Close()
 
 	isEmpty, err := checkFile.Read(make([]byte, 64))
 
@@ -36,11 +38,13 @@ func CheckEncryptedData(encInfoPath string) bool {
 func CheckMasterPassword(pwFilePath string) bool {
 
 	// Check for file's existence, returns an error if unable to open
-	checkFile, err := os.OpenFile(pwFilePath, os.O_RDONLY, 0444)
+	checkFile, err := os.Open(pwFilePath)
 
 	if err != nil {
 		return false
 	}
+
+	defer checkFile.Close()
 
 	// Read file to confirm there are 32 bytes of the hashed master password
 	isEmpty, err := checkFile.Read(make([]byte, 32))
@@ -162,8 +166,6 @@ func UnsealEncryptionKey(pwFilePath string, values [][]byte) ([]byte, error) {
 	// the main data is stored from the 25th byte onwards
 	encKey, ok := secretbox.Open(nil, sealedKey[24:], &nonce, (*[32]byte)(hashedPassword))
 
-	// fmt.Println(encKey, sealedKey)
-
 	if !ok {
 		return nil, errors.New("error while unsealing encryption key")
 	}
@@ -182,8 +184,6 @@ func Run(pwFilePath string) error {
 	if err != nil {
 		return err
 	}
-
-	// UnsealEncryptionKey(pwFilePath, values)
 
 	return nil
 

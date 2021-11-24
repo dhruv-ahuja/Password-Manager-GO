@@ -164,7 +164,7 @@ func SaveEncryptionData(values [][]byte) error {
 
 	}
 
-	return nil
+	return file.Close()
 
 }
 
