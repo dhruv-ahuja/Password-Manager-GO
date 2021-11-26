@@ -8,7 +8,9 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/good-times-ahead/password-manager-go/credentials"
 	"github.com/good-times-ahead/password-manager-go/database"
+	"github.com/good-times-ahead/password-manager-go/password"
 	"golang.org/x/term"
 )
 
@@ -79,7 +81,7 @@ func GetPassInput(argument string) []byte {
 }
 
 // Function to retrieve specific data from the table
-func RetrieveCredentials(query, website string, encryptionKey []byte) ([]Credentials, error) {
+func RetrieveCredentials(query, website string, encryptionKey []byte) ([]credentials.Credentials, error) {
 
 	rows, err := database.DB.Query(query, website)
 
@@ -88,30 +90,30 @@ func RetrieveCredentials(query, website string, encryptionKey []byte) ([]Credent
 	}
 
 	// Prepare a slice to store retrieved credentials
-	var accountsList []Credentials
+	var accountsList []credentials.Credentials
 
 	for rows.Next() {
 
-		var usrInfo Credentials
+		var usrInfo credentials.Credentials
 		var base64Password string
 
 		// Write scanned values to credentials struct except for the password,
 		// which needs to be decrypted
-		err := rows.Scan(&usrInfo.ID, &usrInfo.website, &usrInfo.email, &usrInfo.username, &base64Password)
+		err := rows.Scan(&usrInfo.ID, &usrInfo.Website, &usrInfo.Email, &usrInfo.Username, &base64Password)
 
 		if err != nil {
 			return nil, errors.New("error attempting to retrieve data from query")
 		}
 
 		// Now, to decrypt the password
-		password, err := usrInfo.DecryptPassword(base64Password, encryptionKey)
+		password, err := password.Decrypt(base64Password, encryptionKey, usrInfo)
 
 		if err != nil {
 			return nil, err
 		}
 
 		// Finally, we write the decrypted password to its respective field
-		usrInfo.password = password
+		usrInfo.Password = password
 
 		// Append the credentials variable to the slice
 		accountsList = append(accountsList, usrInfo)
@@ -132,14 +134,14 @@ func RetrieveCredentials(query, website string, encryptionKey []byte) ([]Credent
 }
 
 // Print entries received from database queries
-func PrintEntries(accountsList []Credentials) {
+func PrintEntries(accountsList []credentials.Credentials) {
 
 	// print out the list of found entries
 	for _, usrInfo := range accountsList {
 		// dividing response string into 2 parts to maintain visibility
-		response1 := fmt.Sprintf("ID No. %d, Website: %s, ", usrInfo.ID, usrInfo.website)
+		response1 := fmt.Sprintf("ID No. %d, Website: %s, ", usrInfo.ID, usrInfo.Website)
 
-		response2 := fmt.Sprintf("Email: %s, Username: %s, Password: %s", usrInfo.email, usrInfo.username, usrInfo.password)
+		response2 := fmt.Sprintf("Email: %s, Username: %s, Password: %s", usrInfo.Email, usrInfo.Username, usrInfo.Password)
 
 		fmt.Println(response1 + response2)
 		fmt.Println()

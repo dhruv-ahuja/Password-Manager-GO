@@ -6,6 +6,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/good-times-ahead/password-manager-go/credentials"
+	"github.com/good-times-ahead/password-manager-go/password"
 )
 
 // Function to allow the user to edit credentials
@@ -38,7 +41,7 @@ func EditCredentials(website string, encryptionKey []byte) error {
 	}
 
 	// Preparing struct variable to store users' desired entry
-	var selection Credentials
+	var selection credentials.Credentials
 
 	for _, usrInfo := range accountsList {
 		if input == usrInfo.ID {
@@ -53,7 +56,7 @@ func EditCredentials(website string, encryptionKey []byte) error {
 	// Using bufio NewReader since GetInput function doesn't accept empty input
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("Your current email is: ", selection.email)
+	fmt.Println("Your current email is: ", selection.Email)
 	fmt.Print("Enter new email (leave field blank if no changes): ")
 
 	newEmail, err := reader.ReadString('\n')
@@ -62,7 +65,7 @@ func EditCredentials(website string, encryptionKey []byte) error {
 		return err
 	}
 
-	fmt.Println("Your current username is: ", selection.username)
+	fmt.Println("Your current username is: ", selection.Username)
 	fmt.Print("Enter new username (leave field blank if no changes): ")
 
 	newUsername, err := reader.ReadString('\n')
@@ -71,14 +74,12 @@ func EditCredentials(website string, encryptionKey []byte) error {
 		return err
 	}
 
-	fmt.Println("Your current password is: ", selection.password)
-	fmt.Print("Enter new password (leave field blank if no changes): ")
+	fmt.Println("Your current password is: ", selection.Password)
+	passPrompt := "Enter new password (leave field blank if no changes): "
 
-	newPassword, err := reader.ReadString('\n')
-
-	if err != nil {
-		return err
-	}
+	// newPassword, err := reader.ReadString('\n')
+	getUserPass := GetPassInput(passPrompt)
+	newPassword := string(getUserPass)
 
 	// Trim away spaces left behind by user and ReadString function
 	newEmail, newUsername, newPassword = strings.TrimSpace(newEmail), strings.TrimSpace(newUsername), strings.TrimSpace(newPassword)
@@ -86,21 +87,22 @@ func EditCredentials(website string, encryptionKey []byte) error {
 	// if no errors occur, update current values and prepare to update database entry
 	// todo: try and implement a better way of doing this
 	if newEmail != "" {
-		selection.email = newEmail
+		selection.Email = newEmail
 	}
 
 	if newUsername != "" {
-		selection.username = newUsername
+		selection.Username = newUsername
 	}
 
 	var b64Password string
 
 	if newPassword != "" {
 
-		selection.password = newPassword
+		selection.Password = newPassword
 
 		// // encrypt updated password
-		b64Password, err = selection.EncryptPassword(encryptionKey)
+		// b64Password, err = selection.EncryptPassword(encryptionKey)
+		b64Password, err = password.Encrypt(encryptionKey, selection)
 
 		if err != nil {
 			return err
@@ -114,7 +116,7 @@ func EditCredentials(website string, encryptionKey []byte) error {
 
 	if b64Password != "" {
 		// Set b64Password as struct field only if modified (i.e., not empty)
-		selection.password = b64Password
+		selection.Password = b64Password
 
 		// set modifyPassword to true
 		modifyPassword = true

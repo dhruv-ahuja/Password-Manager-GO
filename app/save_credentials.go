@@ -1,5 +1,10 @@
 package app
 
+import (
+	"github.com/good-times-ahead/password-manager-go/credentials"
+	"github.com/good-times-ahead/password-manager-go/password"
+)
+
 // Save credentials to the database
 func SaveCredentials(encryptionKey []byte) error {
 
@@ -10,16 +15,17 @@ func SaveCredentials(encryptionKey []byte) error {
 	promptPassword := "Enter your password(it will be encrypted before saving): "
 
 	// initialize the variable to save the credentials to
-	var usrInfo Credentials
+	var usrInfo credentials.Credentials
 
 	// Write user input to respective structure fields
-	usrInfo.website = GetInput(promptWebsite)
-	usrInfo.email = GetInput(promptEmail)
-	usrInfo.username = GetInput(promptUsername)
-	usrInfo.password = string(GetPassInput(promptPassword))
+	usrInfo.Website = GetInput(promptWebsite)
+	usrInfo.Email = GetInput(promptEmail)
+	usrInfo.Username = GetInput(promptUsername)
+	usrInfo.Password = string(GetPassInput(promptPassword))
 
 	// encrypt the plain text password
-	encryptedPassword, err := usrInfo.EncryptPassword(encryptionKey)
+	// encryptedPassword, err := usrInfo.EncryptPassword(encryptionKey)
+	encryptedPassword, err := password.Encrypt(encryptionKey, usrInfo)
 
 	if err != nil {
 		return err
