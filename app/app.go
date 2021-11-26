@@ -15,22 +15,22 @@ func TakeInput(usrInput string, encryptionKey []byte) error {
 		return SaveCredentials(encryptionKey)
 
 	case "2":
-		askForWebsite := "Enter the website to retrieve accounts for: "
-		website := GetInput(askForWebsite)
+		askForKey := "Enter the key to retrieve accounts for: "
+		key := GetInput(askForKey)
 
-		return ViewSavedCredentials(website, encryptionKey)
+		return ViewSavedCredentials(key, encryptionKey)
 
 	case "3":
-		askForWebsite := "Enter the website to edit credentials for: "
-		website := GetInput(askForWebsite)
+		askForKey := "Enter the key to edit credentials for: "
+		key := GetInput(askForKey)
 
-		return EditCredentials(website, encryptionKey)
+		return EditCredentials(key, encryptionKey)
 
 	case "4":
-		askForWebsite := "Enter the website to delete credentials for: "
-		website := GetInput(askForWebsite)
+		askForKey := "Enter the website to delete credentials for: "
+		key := GetInput(askForKey)
 
-		return DeleteCredentials(website, encryptionKey)
+		return DeleteCredentials(key, encryptionKey)
 
 	case "0":
 		os.Exit(0)

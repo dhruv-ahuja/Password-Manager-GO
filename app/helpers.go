@@ -57,7 +57,7 @@ func GetPassInput(argument string) []byte {
 
 	for isEmpty {
 
-		fmt.Println(argument)
+		fmt.Print(argument)
 
 		usrInput, err := term.ReadPassword(int(syscall.Stdin))
 
@@ -81,9 +81,9 @@ func GetPassInput(argument string) []byte {
 }
 
 // Function to retrieve specific data from the table
-func RetrieveCredentials(query, website string, encryptionKey []byte) ([]credentials.Credentials, error) {
+func RetrieveCredentials(query, key string, encryptionKey []byte) ([]credentials.Credentials, error) {
 
-	rows, err := database.DB.Query(query, website)
+	rows, err := database.DB.Query(query, key)
 
 	if err != nil {
 		return nil, errors.New("error executing query")
@@ -99,7 +99,7 @@ func RetrieveCredentials(query, website string, encryptionKey []byte) ([]credent
 
 		// Write scanned values to credentials struct except for the password,
 		// which needs to be decrypted
-		err := rows.Scan(&usrInfo.ID, &usrInfo.Website, &usrInfo.Email, &usrInfo.Username, &base64Password)
+		err := rows.Scan(&usrInfo.ID, &usrInfo.Key, &base64Password)
 
 		if err != nil {
 			return nil, errors.New("error attempting to retrieve data from query")
@@ -121,7 +121,7 @@ func RetrieveCredentials(query, website string, encryptionKey []byte) ([]credent
 
 	if len(accountsList) == 0 {
 		// if the received slice is empty
-		fmt.Println("Sorry, no accounts saved for that website!")
+		fmt.Println("Sorry, no accounts saved for that key!")
 
 	} else {
 
@@ -139,11 +139,9 @@ func PrintEntries(accountsList []credentials.Credentials) {
 	// print out the list of found entries
 	for _, usrInfo := range accountsList {
 		// dividing response string into 2 parts to maintain visibility
-		response1 := fmt.Sprintf("ID No. %d, Website: %s, ", usrInfo.ID, usrInfo.Website)
+		response1 := fmt.Sprintf("ID No. %d, Key: %s, Password: %s", usrInfo.ID, usrInfo.Key, usrInfo.Password)
 
-		response2 := fmt.Sprintf("Email: %s, Username: %s, Password: %s", usrInfo.Email, usrInfo.Username, usrInfo.Password)
-
-		fmt.Println(response1 + response2)
+		fmt.Println(response1)
 		fmt.Println()
 
 	}

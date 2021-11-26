@@ -12,12 +12,12 @@ import (
 )
 
 // Function to allow the user to edit credentials
-func EditCredentials(website string, encryptionKey []byte) error {
+func EditCredentials(key string, encryptionKey []byte) error {
 
-	query := "SELECT * FROM info where website=$1 ORDER BY id ASC;"
+	query := "SELECT * FROM info where key = $1 ORDER BY id ASC;"
 
 	// call the function to retrieve credentials given relevant query
-	accountsList, err := RetrieveCredentials(query, website, encryptionKey)
+	accountsList, err := RetrieveCredentials(query, key, encryptionKey)
 
 	if err != nil {
 		return err
@@ -56,42 +56,29 @@ func EditCredentials(website string, encryptionKey []byte) error {
 	// Using bufio NewReader since GetInput function doesn't accept empty input
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("Your current email is: ", selection.Email)
-	fmt.Print("Enter new email (leave field blank if no changes): ")
+	fmt.Println("Your current 'key' entry is: ", selection.Key)
+	fmt.Print("Enter new key (leave field blank if no changes): ")
 
-	newEmail, err := reader.ReadString('\n')
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Your current username is: ", selection.Username)
-	fmt.Print("Enter new username (leave field blank if no changes): ")
-
-	newUsername, err := reader.ReadString('\n')
+	newKey, err := reader.ReadString('\n')
 
 	if err != nil {
 		return err
 	}
 
 	fmt.Println("Your current password is: ", selection.Password)
-	passPrompt := "Enter new password (leave field blank if no changes): "
+	passPrompt := "Enter new password: "
 
 	// newPassword, err := reader.ReadString('\n')
 	getUserPass := GetPassInput(passPrompt)
 	newPassword := string(getUserPass)
 
 	// Trim away spaces left behind by user and ReadString function
-	newEmail, newUsername, newPassword = strings.TrimSpace(newEmail), strings.TrimSpace(newUsername), strings.TrimSpace(newPassword)
+	newKey = strings.TrimSpace(newKey)
 
 	// if no errors occur, update current values and prepare to update database entry
 	// todo: try and implement a better way of doing this
-	if newEmail != "" {
-		selection.Email = newEmail
-	}
-
-	if newUsername != "" {
-		selection.Username = newUsername
+	if newKey != "" {
+		selection.Key = newKey
 	}
 
 	var b64Password string
