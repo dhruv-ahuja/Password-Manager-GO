@@ -30,4 +30,4 @@ Finally, open your terminal and use the command in the project directory: ```go 
 
 # TODO
 1) Perhaps implement copying the password to the users' clipboard instead of just displaying it.
-2) Improve the way authentication is handled.
+2) Clean up table entries and implement ILIKE search functionality to improve user-experience.  
