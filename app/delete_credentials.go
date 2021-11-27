@@ -26,16 +26,29 @@ func DeleteCredentials(key string, encryptionKey []byte) error {
 		return nil
 	}
 
-	// Get users' input to find the entry they want to delete
-	msg := "Enter the ID No. of the entry you want to delete: "
+	selectID := false
+	input := 0
+	for !selectID {
 
-	usrInput := GetInput(msg)
+		// Get users' input to find the entry they want to delete
+		msg := "Enter the ID No. of the entry you want to delete: "
 
-	// Converting the string input to integer for comparison
-	input, err := strconv.Atoi(usrInput)
+		usrInput := GetInput(msg)
 
-	if err != nil {
-		return errors.New("error converting user input(string) to integer")
+		// Converting the string input to integer for comparison
+		input, err = strconv.Atoi(usrInput)
+
+		if err != nil {
+			return errors.New("error converting user input(string) to integer")
+		}
+
+		for _, entry := range accountsList {
+			if entry.ID == input {
+				selectID = true
+				break
+			}
+		}
+		fmt.Println("Entered ID outside range!")
 	}
 
 	deletionQuery := "DELETE FROM info WHERE ID=$1"

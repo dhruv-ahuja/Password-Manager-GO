@@ -2,6 +2,7 @@ package app
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -28,18 +29,33 @@ func EditCredentials(key string, encryptionKey []byte) error {
 		return nil
 	}
 
-	// Get users' input to find the entry they want to modify
-	msg := "Enter the ID No. of the entry you want to modify: "
+	selectID := false
+	input := 0
+	for !selectID {
 
-	usrInput := GetInput(msg)
+		// Get users' input to find the entry they want to modify
+		msg := "Enter the ID No. of the entry you want to modify: "
 
-	// Converting the string input to integer for comparison
-	input, err := strconv.Atoi(usrInput)
+		usrInput := GetInput(msg)
 
-	if err != nil {
-		return err
+		// Converting the string input to integer for comparison
+		input, err = strconv.Atoi(usrInput)
+
+		if err != nil {
+			return errors.New("error converting user input(string) to integer")
+		}
+
+		for _, entry := range accountsList {
+			if entry.ID == input {
+				selectID = true
+				break
+			}
+		}
+		fmt.Println("Entered ID outside range!")
 	}
 
+	// TODO: add check to ensure id in accountsList
+	fmt.Println("Input is: ", input)
 	// Preparing struct variable to store users' desired entry
 	var selection credentials.Credentials
 
