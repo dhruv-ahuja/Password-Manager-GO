@@ -83,7 +83,7 @@ func GetPassInput(argument string) []byte {
 // Function to retrieve specific data from the table
 func RetrieveCredentials(query, key string, encryptionKey []byte) ([]credentials.Credentials, error) {
 
-	rows, err := database.DB.Query(query, key)
+	rows, err := database.DB.Query(query, "%"+key+"%")
 
 	if err != nil {
 		return nil, errors.New("error executing query")

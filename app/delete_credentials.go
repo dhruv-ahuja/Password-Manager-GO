@@ -12,7 +12,7 @@ import (
 func DeleteCredentials(key string, encryptionKey []byte) error {
 
 	//"$" is postgres' equivalent of "?"
-	query := "SELECT * FROM info where key = $1 ORDER BY id ASC"
+	query := "SELECT * FROM info WHERE key ILIKE $1 ORDER BY id ASC;"
 
 	// call the function to retrieve credentials given relevant query
 	accountsList, err := RetrieveCredentials(query, key, encryptionKey)

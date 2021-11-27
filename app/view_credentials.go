@@ -4,7 +4,7 @@ package app
 func ViewSavedCredentials(key string, encryptionKey []byte) error {
 
 	// Get all accounts associated with the website
-	query := "SELECT * FROM info WHERE key = $1 ORDER BY id ASC"
+	query := "SELECT * FROM info WHERE key ILIKE $1 ORDER BY id ASC;"
 
 	_, err := RetrieveCredentials(query, key, encryptionKey)
 
