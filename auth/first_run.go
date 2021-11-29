@@ -12,19 +12,15 @@ import (
 )
 
 // This file contains functions that will be executed if it is the users' run of the app
-var encInfoPath = "./encrypted_data"
 
 // Ask the user to enter their master password
 func GetMasterPassword() string {
 
-	msg := `
+	fmt.Println(`
 Hello and welcome to the Password Manager GO application. If you are seeing this message then this must be your first time using the application. 
 To get started, you must first create a master password which will be used to authenticate you each time you run the application.
 Set a secure password and remember it since there will be no way to recover it!
-	`
-
-	// Print out the introductory message
-	fmt.Println(msg)
+	`)
 
 	// get users' desired master password in plain text, will be hashed later
 	// use App packages' GetPassInput function
@@ -81,6 +77,7 @@ func CheckPasswordStrength(usrInput string) bool {
 
 // Argon2 is considered better than bcrypt for securing passwords
 func HashMasterPassword(usrInput, pwFilePath string) ([]byte, []byte, error) {
+
 	// generate 32 bytes salt
 	salt := make([]byte, 32)
 
@@ -99,6 +96,7 @@ func HashMasterPassword(usrInput, pwFilePath string) ([]byte, []byte, error) {
 }
 
 func SaveMasterPassword(pwFilePath string, hashedMasterPassword []byte) error {
+
 	// Creates file if doesn't exist; permission code "4" means the file is read-only
 	err := os.WriteFile(pwFilePath, hashedMasterPassword, 0444)
 
@@ -113,9 +111,8 @@ func SaveMasterPassword(pwFilePath string, hashedMasterPassword []byte) error {
 }
 
 func GenerateEncryptionKey() ([]byte, error) {
-	// add file path to check for existing enc_key existence
 
-	// if file empty/doesn't exist, generate a new encryption key
+	// generate a new encryption key
 	encryptionKey := make([]byte, 32)
 
 	if _, err := rand.Read(encryptionKey); err != nil {
@@ -129,7 +126,6 @@ func GenerateEncryptionKey() ([]byte, error) {
 func SealEncryptionKey(hashedPassword []byte, encryptionKey []byte) ([]byte, error) {
 
 	// make slice to store rand's generated output
-	// generateNonce := make([]byte, 24)
 	var nonce [24]byte
 
 	// generate nonce to use with secretbox.Seal
@@ -140,14 +136,12 @@ func SealEncryptionKey(hashedPassword []byte, encryptionKey []byte) ([]byte, err
 	// use secretbox to seal the encryption key
 	sealedEncKey := secretbox.Seal(nonce[:], encryptionKey, &nonce, (*[32]byte)(hashedPassword))
 
-	// returning nonce as well since we'll be writing the nonce, sealed encryption key
-	// and the salt generated with master password to disk for subsequent usage
 	return sealedEncKey, nil
 
 }
 
-// Save the salt, sealed encryption key and nonce to file
-func SaveEncryptionData(values [][]byte) error {
+// Save the salt and sealed encryption key to disk
+func SaveEncryptionData(encInfoPath string, values [][]byte) error {
 
 	file, err := os.OpenFile(encInfoPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0444)
 
@@ -167,7 +161,7 @@ func SaveEncryptionData(values [][]byte) error {
 
 }
 
-func FirstRun(pwFilePath string) error {
+func FirstRun(encInfoPath, pwFilePath string) error {
 
 	// generate encryption key at the very start
 	encKey, err := GenerateEncryptionKey()
@@ -179,12 +173,14 @@ func FirstRun(pwFilePath string) error {
 	// if password doesn't exist yet
 	usrInput := GetMasterPassword()
 
+	// Hash the master password
 	salt, hashedPassword, err := HashMasterPassword(usrInput, pwFilePath)
 
 	if err != nil {
 		return err
 	}
 
+	// Save the master password to disk
 	savePasswordErr := SaveMasterPassword(pwFilePath, hashedPassword)
 
 	if savePasswordErr != nil {
@@ -194,11 +190,10 @@ func FirstRun(pwFilePath string) error {
 	// after master password has been generated properly, we will seal our encryption key
 	sealedEncKey, err := SealEncryptionKey(hashedPassword, encKey)
 
-	// combine nonce, sealed key and salt into a slice
-
+	// combine sealed key and salt into a slice
 	values := [][]byte{salt, sealedEncKey}
 
-	saveDataErr := SaveEncryptionData(values)
+	saveDataErr := SaveEncryptionData(encInfoPath, values)
 
 	if saveDataErr != nil {
 		return err
