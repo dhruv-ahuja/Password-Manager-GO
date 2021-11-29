@@ -9,50 +9,47 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var DB *sql.DB
+type DBConn struct {
+	DB *sql.DB
+}
 
-//Connect to database
-func ConnecttoDB() error {
-	// declare necessary parameters
-	host := os.Getenv("HOST")
-	port := os.Getenv("PORT")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
+type Config struct {
+	host     string
+	port     string
+	user     string
+	password string
+	dbname   string
+}
 
-	// Prepare postgres connection parameters
-	psqlInfo := fmt.Sprint("host=", host, " port=", port, " user=", user, " password=", password, " dbname=", dbname, " sslmode=disable")
+// attempting to implement Data Injection/Inversion *sweat*
+func NewDatabaseConn(db *sql.DB) *DBConn {
+	return &DBConn{DB: db}
+}
 
-	// Establish connection
-	db, err := sql.Open("postgres", psqlInfo)
+func GenerateConfig() Config {
 
-	if err != nil {
-		return errors.New("error establishing connection to postgres, please check your parameters")
-	}
+	var c Config
 
-	// Ping to confirm whether connection works
-	if err = db.Ping(); err != nil {
-		return errors.New("unable to successfully ping the database")
-	}
+	c.host = os.Getenv("HOST")
+	c.port = os.Getenv("PORT")
+	c.user = os.Getenv("DB_USER")
+	c.password = os.Getenv("DB_PASSWORD")
+	c.dbname = os.Getenv("DB_NAME")
 
-	fmt.Println("Connected to the Database successfully!")
-
-	DB = db
-
-	return nil
-
+	return c
 }
 
 // Check whether the table to use exists or not
-func TableExists() error {
+func (conn *DBConn) TableExists() error {
 	// Returns error if table does not exist.
 	query := "SELECT 'public.info'::regclass"
 
-	_, err := DB.Exec(query)
+	// _, err := DB.Exec(query)
+	_, err := conn.DB.Exec(query)
 
 	if err != nil {
 		// an error means that the table doesn't exist, we need to call the MakeTable function
-		if err := MakeTable(); err != nil {
+		if err := conn.MakeTable(); err != nil {
 			return err
 
 		}
@@ -67,7 +64,7 @@ func TableExists() error {
 }
 
 // Make the table which we will use for all our operations
-func MakeTable() error {
+func (conn *DBConn) MakeTable() error {
 
 	fmt.Println("First-time execution; creating table...")
 
@@ -82,7 +79,7 @@ func MakeTable() error {
 	}
 
 	// Convert the slice to a string since the database connector only accepts strings for queries.
-	if _, err := DB.Exec(string(queries)); err != nil {
+	if _, err := conn.DB.Exec(string(queries)); err != nil {
 		return errors.New("unable to make table 'info'")
 	}
 
