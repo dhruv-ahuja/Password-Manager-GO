@@ -21,10 +21,10 @@ type AppFuncs interface {
 
 // struct that stores a struct that stores the database connection
 type DBConn struct {
-	Repo database.Repo
+	Repo *database.Repo
 }
 
-func NewDB(db database.Repo) *DBConn {
+func NewDBConn(db *database.Repo) *DBConn {
 	return &DBConn{
 		Repo: db,
 	}

@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"strconv"
 )
 
 // Function to allow users to delete credentials
@@ -34,14 +33,14 @@ func (DBConn *DBConn) DeleteCredentials(key string, encryptionKey []byte) error 
 		usrInput := GetInput(msg)
 
 		// Converting the string input to integer for comparison
-		input, err = strconv.Atoi(usrInput)
+		// input, err = strconv.Atoi(usrInput)
 
 		if err != nil {
 			return errors.New("error converting user input(string) to integer")
 		}
 
 		for _, entry := range accountsList {
-			if entry.ID == input {
+			if entry["id"] == usrInput {
 				selectID = true
 				break
 			}

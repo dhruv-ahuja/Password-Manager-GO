@@ -28,12 +28,20 @@ func initialize() error {
 		return errors.New("error reading from .env file, please check")
 	}
 
+	// Generate database config
+	dbConfig := database.GenerateConfig()
+
 	// Initialize connection to the database
-	err := database.ConnecttoDB()
+	dbVar, err := database.ConnecttoDB(dbConfig)
 
 	if err != nil {
 		return err
 	}
+
+	// Get the Struct with DB connection and relevant methods
+	repo := database.NewDBRepo(dbVar)
+
+	dbConn := app.NewDBConn(repo)
 
 	// Path to hashed master password file
 	pwFilePath := "./master_pw"
@@ -46,14 +54,15 @@ func initialize() error {
 	if !checkEncData {
 
 		// Drop any existing table and start afresh
-		err := database.MakeTable()
+		// err := database.MakeTable()
+		err := dbConn.Repo.MakeTable()
 
 		if err != nil {
 			return err
 		}
 
 		// Execute "first-run" functions
-		err = auth.FirstRun(pwFilePath)
+		err = auth.FirstRun(encInfoPath, pwFilePath)
 
 		if err != nil {
 			return err
@@ -62,13 +71,14 @@ func initialize() error {
 	}
 
 	// Check if our table already exists
-	checkTableErr := database.TableExists()
+	// checkTableErr := database.TableExists()
+	checkTableErr := dbConn.Repo.TableExists()
 
 	if checkTableErr != nil {
 		return checkTableErr
 	}
 
-	err = auth.Run(pwFilePath)
+	err = auth.Run(encInfoPath, pwFilePath)
 
 	if err != nil {
 		return err
@@ -101,7 +111,7 @@ func initialize() error {
 
 		usrInput := app.GetInput(mainMsg)
 
-		err := app.TakeInput(usrInput, encryptionKey)
+		err := dbConn.TakeInput(usrInput, encryptionKey)
 
 		if err != nil {
 			return err

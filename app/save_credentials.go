@@ -1,7 +1,6 @@
 package app
 
 import (
-	"github.com/good-times-ahead/password-manager-go/credentials"
 	"github.com/good-times-ahead/password-manager-go/password"
 )
 
@@ -13,21 +12,21 @@ func (DBConn *DBConn) SaveCredentials(encryptionKey []byte) error {
 	promptPassword := "Enter your password(it will be encrypted before saving): "
 
 	// initialize the variable to save the credentials to
-	var usrInfo credentials.Credentials
+	usrInfo := make(map[string]string, 3)
 
 	// Write user input to respective structure fields
-	usrInfo.Key = GetInput(promptKey)
-	usrInfo.Password = string(GetPassInput(promptPassword))
+	usrInfo["key"] = GetInput(promptKey)
+	usrInfo["password"] = string(GetPassInput(promptPassword))
 
 	// encrypt the plain text password
-	encryptedPassword, err := password.Encrypt(encryptionKey, usrInfo)
+	encryptedPassword, err := password.Encrypt(encryptionKey, usrInfo["password"])
 
 	if err != nil {
 		return err
 	}
 
 	// save the credentials to the database
-	if saveToDB := usrInfo.InsertIntoDB(encryptedPassword); saveToDB != nil {
+	if saveToDB := DBConn.Repo.InsertIntoDB(encryptedPassword, usrInfo); saveToDB != nil {
 		return saveToDB
 	}
 

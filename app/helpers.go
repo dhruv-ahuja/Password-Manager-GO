@@ -8,7 +8,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/good-times-ahead/password-manager-go/credentials"
 	"github.com/good-times-ahead/password-manager-go/password"
 	"golang.org/x/term"
 )
@@ -80,7 +79,7 @@ func GetPassInput(argument string) []byte {
 }
 
 // Function to retrieve specific data from the table
-func (DBConn *DBConn) RetrieveCredentials(query, key string, encryptionKey []byte) ([]credentials.Credentials, error) {
+func (DBConn *DBConn) RetrieveCredentials(query, key string, encryptionKey []byte) ([]map[string]string, error) {
 
 	rows, err := DBConn.Repo.DB.Query(query, "%"+key+"%")
 
@@ -88,31 +87,31 @@ func (DBConn *DBConn) RetrieveCredentials(query, key string, encryptionKey []byt
 		return nil, errors.New("error executing query")
 	}
 
-	// Prepare a slice to store retrieved credentials
-	var accountsList []credentials.Credentials
+	// Prepare a slice of maps to store retrieved credentials
+	var accountsList []map[string]string
 
 	for rows.Next() {
 
-		var usrInfo credentials.Credentials
+		usrInfo := make(map[string]string, 3)
 		var base64Password string
 
 		// Write scanned values to credentials struct except for the password,
 		// which needs to be decrypted
-		err := rows.Scan(&usrInfo.ID, &usrInfo.Key, &base64Password)
+		err := rows.Scan(usrInfo["id"], usrInfo["key"], usrInfo["password"])
 
 		if err != nil {
 			return nil, errors.New("error attempting to retrieve data from query")
 		}
 
 		// Now, to decrypt the password
-		password, err := password.Decrypt(base64Password, encryptionKey, usrInfo)
+		password, err := password.Decrypt(base64Password, encryptionKey)
 
 		if err != nil {
 			return nil, err
 		}
 
 		// Finally, we write the decrypted password to its respective field
-		usrInfo.Password = password
+		usrInfo["password"] = password
 
 		// Append the credentials variable to the slice
 		accountsList = append(accountsList, usrInfo)
@@ -133,12 +132,12 @@ func (DBConn *DBConn) RetrieveCredentials(query, key string, encryptionKey []byt
 }
 
 // Print entries received from database queries
-func PrintEntries(accountsList []credentials.Credentials) {
+func PrintEntries(accountsList []map[string]string) {
 
-	// print out the list of found entries
+	// print out the list of found entries (in the form of dictionaries/maps)
 	for _, usrInfo := range accountsList {
 		// dividing response string into 2 parts to maintain visibility
-		response1 := fmt.Sprintf("ID No. %d, Key: %s, Password: %s", usrInfo.ID, usrInfo.Key, usrInfo.Password)
+		response1 := fmt.Sprintf("ID No. %s, Key: %s, Password: %s", usrInfo["id"], usrInfo["key"], usrInfo["password"])
 
 		fmt.Println(response1)
 		fmt.Println()

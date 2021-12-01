@@ -7,14 +7,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"io"
-
-	"github.com/good-times-ahead/password-manager-go/credentials"
 )
 
 // Encrypt the plain-text password
-func Encrypt(encryptionKey []byte, c credentials.Credentials) (string, error) {
+func Encrypt(encryptionKey []byte, plainText string) (string, error) {
 
-	password := []byte(c.Password)
+	password := []byte(plainText)
 
 	generatedCipher, err := aes.NewCipher(encryptionKey)
 

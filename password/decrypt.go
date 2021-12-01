@@ -6,12 +6,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-
-	"github.com/good-times-ahead/password-manager-go/credentials"
 )
 
 // Decrypt the base64 encoded password
-func Decrypt(base64Password string, encryptionKey []byte, c credentials.Credentials) (string, error) {
+func Decrypt(base64Password string, encryptionKey []byte) (string, error) {
 
 	// decrypting the base64 password string to retrieve our AES-encrypted password
 	encryptedPassword, err := base64.StdEncoding.DecodeString(base64Password)

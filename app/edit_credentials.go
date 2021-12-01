@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
-	"github.com/good-times-ahead/password-manager-go/credentials"
 	"github.com/good-times-ahead/password-manager-go/password"
 )
 
@@ -30,7 +28,8 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 	}
 
 	selectID := false
-	input := 0
+	usrInput := ""
+
 	for !selectID {
 
 		// Get users' input to find the entry they want to modify
@@ -39,14 +38,14 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 		usrInput := GetInput(msg)
 
 		// Converting the string input to integer for comparison
-		input, err = strconv.Atoi(usrInput)
+		// input, err = strconv.Atoi(usrInput)
 
 		if err != nil {
 			return errors.New("error converting user input(string) to integer")
 		}
 
 		for _, entry := range accountsList {
-			if entry.ID == input {
+			if entry["id"] == usrInput {
 				selectID = true
 				break
 			}
@@ -54,13 +53,14 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 		fmt.Println("Entered ID outside range!")
 	}
 
-	// TODO: add check to ensure id in accountsList
-	fmt.Println("Input is: ", input)
 	// Preparing struct variable to store users' desired entry
-	var selection credentials.Credentials
+	// var selection credentials.Credentials
+	selection := make(map[string]string, 3)
+
+	fmt.Println("testing, input is: ", usrInput)
 
 	for _, usrInfo := range accountsList {
-		if input == usrInfo.ID {
+		if usrInput == usrInfo["id"] {
 
 			selection = usrInfo
 
@@ -72,7 +72,7 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 	// Using bufio NewReader since GetInput function doesn't accept empty input
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("Your current 'key' entry is: ", selection.Key)
+	fmt.Println("Your current 'key' entry is: ", selection["key"])
 	fmt.Print("Enter new key (leave field blank if no changes): ")
 
 	newKey, err := reader.ReadString('\n')
@@ -81,7 +81,7 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 		return err
 	}
 
-	fmt.Println("Your current password is: ", selection.Password)
+	fmt.Println("Your current password is: ", selection["password"])
 	passPrompt := "Enter new password: "
 
 	// newPassword, err := reader.ReadString('\n')
@@ -94,18 +94,18 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 	// if no errors occur, update current values and prepare to update database entry
 	// todo: try and implement a better way of doing this
 	if newKey != "" {
-		selection.Key = newKey
+		selection["key"] = newKey
 	}
 
 	var b64Password string
 
 	if newPassword != "" {
 
-		selection.Password = newPassword
+		selection["password"] = newPassword
 
 		// // encrypt updated password
 		// b64Password, err = selection.EncryptPassword(encryptionKey)
-		b64Password, err = password.Encrypt(encryptionKey, selection)
+		b64Password, err = password.Encrypt(encryptionKey, selection["password"])
 
 		if err != nil {
 			return err
@@ -119,14 +119,15 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 
 	if b64Password != "" {
 		// Set b64Password as struct field only if modified (i.e., not empty)
-		selection.Password = b64Password
+		selection["password"] = b64Password
 
 		// set modifyPassword to true
 		modifyPassword = true
-		err = selection.UpdateCredentials(modifyPassword)
+		// err = UpdateCredentials(modifyPassword)
+		err = DBConn.Repo.UpdateCredentials(modifyPassword, selection)
 
 	} else {
-		err = selection.UpdateCredentials(modifyPassword)
+		err = DBConn.Repo.UpdateCredentials(modifyPassword, selection)
 	}
 
 	if err != nil {

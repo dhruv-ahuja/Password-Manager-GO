@@ -22,7 +22,7 @@ type Config struct {
 }
 
 // attempting to implement Data Injection/Inversion *sweat*
-func NewDatabaseConn(db *sql.DB) *Repo {
+func NewDBRepo(db *sql.DB) *Repo {
 	return &Repo{DB: db}
 }
 
