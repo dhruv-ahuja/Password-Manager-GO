@@ -24,33 +24,32 @@ func (DBConn *DBConn) DeleteCredentials(key string, encryptionKey []byte) error 
 	}
 
 	selectID := false
-	input := 0
+	usrInput := ""
+
 	for !selectID {
 
-		// Get users' input to find the entry they want to delete
-		msg := "Enter the ID No. of the entry you want to delete: "
+		// Get users' input to find the entry they want to modify
+		msg := "Enter the ID No. of the entry you want to modify: "
 
-		usrInput := GetInput(msg)
-
-		// Converting the string input to integer for comparison
-		// input, err = strconv.Atoi(usrInput)
-
-		if err != nil {
-			return errors.New("error converting user input(string) to integer")
-		}
+		usrInput = GetInput(msg)
 
 		for _, entry := range accountsList {
+			fmt.Println(entry)
 			if entry["id"] == usrInput {
 				selectID = true
-				break
 			}
 		}
+
+		if selectID {
+			break
+		}
+
 		fmt.Println("Entered ID outside range!")
 	}
 
 	deletionQuery := "DELETE FROM info WHERE ID=$1"
 
-	_, err = DBConn.Repo.DB.Exec(deletionQuery, input)
+	_, err = DBConn.Repo.DB.Exec(deletionQuery, usrInput)
 
 	if err != nil {
 		return errors.New("error deleting selected entry")

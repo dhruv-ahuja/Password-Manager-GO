@@ -12,6 +12,76 @@ import (
 	"golang.org/x/term"
 )
 
+// Function to retrieve specific data from the table
+func (DBConn *DBConn) RetrieveCredentials(query, key string, encryptionKey []byte) ([]map[string]string, error) {
+
+	rows, err := DBConn.Repo.DB.Query(query, "%"+key+"%")
+
+	if err != nil {
+		return nil, errors.New("error executing query")
+	}
+
+	// Prepare a slice of maps to store retrieved credentials
+	var accountsList []map[string]string
+
+	for rows.Next() {
+
+		usrInfo := make(map[string]string, 3)
+		var id, key, base64Password string
+
+		// Write scanned values to credentials struct except for the password,
+		// which needs to be decrypted
+		err := rows.Scan(&id, &key, &base64Password)
+
+		if err != nil {
+			// return nil, errors.New("error attempting to retrieve data from query: ", err)
+			return nil, fmt.Errorf("error attempting to retrieve data from query: %s", err)
+		}
+
+		// Now, to decrypt the password
+		password, err := password.Decrypt(base64Password, encryptionKey)
+
+		if err != nil {
+			return nil, err
+		}
+
+		// Finally, we write the decrypted password plus other variables to their respective keys
+		usrInfo["id"] = id
+		usrInfo["key"] = key
+		usrInfo["password"] = password
+
+		// Append the credentials variable to the slice
+		accountsList = append(accountsList, usrInfo)
+	}
+
+	if len(accountsList) == 0 {
+		// if the received slice is empty
+		fmt.Println("Sorry, no accounts saved for that key!")
+
+	} else {
+
+		PrintEntries(accountsList)
+
+	}
+
+	return accountsList, nil
+
+}
+
+// Print entries received from database queries
+func PrintEntries(accountsList []map[string]string) {
+
+	// print out the list of found entries (in the form of dictionaries/maps)
+	for _, usrInfo := range accountsList {
+
+		response := fmt.Sprintf("ID No. %s, Key: %s, Password: %s", usrInfo["id"], usrInfo["key"], usrInfo["password"])
+
+		fmt.Println(response)
+		fmt.Println()
+
+	}
+}
+
 // Function to get user input in a streamlined fashion.
 func GetInput(argument string) string {
 
@@ -76,71 +146,4 @@ func GetPassInput(argument string) []byte {
 
 	return nil
 
-}
-
-// Function to retrieve specific data from the table
-func (DBConn *DBConn) RetrieveCredentials(query, key string, encryptionKey []byte) ([]map[string]string, error) {
-
-	rows, err := DBConn.Repo.DB.Query(query, "%"+key+"%")
-
-	if err != nil {
-		return nil, errors.New("error executing query")
-	}
-
-	// Prepare a slice of maps to store retrieved credentials
-	var accountsList []map[string]string
-
-	for rows.Next() {
-
-		usrInfo := make(map[string]string, 3)
-		var base64Password string
-
-		// Write scanned values to credentials struct except for the password,
-		// which needs to be decrypted
-		err := rows.Scan(usrInfo["id"], usrInfo["key"], usrInfo["password"])
-
-		if err != nil {
-			return nil, errors.New("error attempting to retrieve data from query")
-		}
-
-		// Now, to decrypt the password
-		password, err := password.Decrypt(base64Password, encryptionKey)
-
-		if err != nil {
-			return nil, err
-		}
-
-		// Finally, we write the decrypted password to its respective field
-		usrInfo["password"] = password
-
-		// Append the credentials variable to the slice
-		accountsList = append(accountsList, usrInfo)
-	}
-
-	if len(accountsList) == 0 {
-		// if the received slice is empty
-		fmt.Println("Sorry, no accounts saved for that key!")
-
-	} else {
-
-		PrintEntries(accountsList)
-
-	}
-
-	return accountsList, nil
-
-}
-
-// Print entries received from database queries
-func PrintEntries(accountsList []map[string]string) {
-
-	// print out the list of found entries (in the form of dictionaries/maps)
-	for _, usrInfo := range accountsList {
-		// dividing response string into 2 parts to maintain visibility
-		response1 := fmt.Sprintf("ID No. %s, Key: %s, Password: %s", usrInfo["id"], usrInfo["key"], usrInfo["password"])
-
-		fmt.Println(response1)
-		fmt.Println()
-
-	}
 }

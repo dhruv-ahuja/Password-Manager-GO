@@ -2,7 +2,6 @@ package app
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -35,29 +34,25 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 		// Get users' input to find the entry they want to modify
 		msg := "Enter the ID No. of the entry you want to modify: "
 
-		usrInput := GetInput(msg)
-
-		// Converting the string input to integer for comparison
-		// input, err = strconv.Atoi(usrInput)
-
-		if err != nil {
-			return errors.New("error converting user input(string) to integer")
-		}
+		usrInput = GetInput(msg)
 
 		for _, entry := range accountsList {
+			fmt.Println(entry)
 			if entry["id"] == usrInput {
 				selectID = true
-				break
 			}
 		}
+
+		if selectID {
+			break
+		}
+
 		fmt.Println("Entered ID outside range!")
 	}
 
 	// Preparing struct variable to store users' desired entry
 	// var selection credentials.Credentials
 	selection := make(map[string]string, 3)
-
-	fmt.Println("testing, input is: ", usrInput)
 
 	for _, usrInfo := range accountsList {
 		if usrInput == usrInfo["id"] {
@@ -84,15 +79,13 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 	fmt.Println("Your current password is: ", selection["password"])
 	passPrompt := "Enter new password: "
 
-	// newPassword, err := reader.ReadString('\n')
 	getUserPass := GetPassInput(passPrompt)
 	newPassword := string(getUserPass)
 
 	// Trim away spaces left behind by user and ReadString function
 	newKey = strings.TrimSpace(newKey)
 
-	// if no errors occur, update current values and prepare to update database entry
-	// todo: try and implement a better way of doing this
+	// Update current values and prepare to update database entry
 	if newKey != "" {
 		selection["key"] = newKey
 	}
@@ -103,8 +96,7 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 
 		selection["password"] = newPassword
 
-		// // encrypt updated password
-		// b64Password, err = selection.EncryptPassword(encryptionKey)
+		// encrypt updated password
 		b64Password, err = password.Encrypt(encryptionKey, selection["password"])
 
 		if err != nil {
