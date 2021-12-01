@@ -9,7 +9,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type DBConn struct {
+type Repo struct {
 	DB *sql.DB
 }
 
@@ -22,8 +22,8 @@ type Config struct {
 }
 
 // attempting to implement Data Injection/Inversion *sweat*
-func NewDatabaseConn(db *sql.DB) *DBConn {
-	return &DBConn{DB: db}
+func NewDatabaseConn(db *sql.DB) *Repo {
+	return &Repo{DB: db}
 }
 
 func GenerateConfig() Config {
@@ -40,7 +40,7 @@ func GenerateConfig() Config {
 }
 
 // Check whether the table to use exists or not
-func (conn *DBConn) TableExists() error {
+func (conn *Repo) TableExists() error {
 	// Returns error if table does not exist.
 	query := "SELECT 'public.info'::regclass"
 
@@ -64,7 +64,7 @@ func (conn *DBConn) TableExists() error {
 }
 
 // Make the table which we will use for all our operations
-func (conn *DBConn) MakeTable() error {
+func (conn *Repo) MakeTable() error {
 
 	fmt.Println("First-time execution; creating table...")
 

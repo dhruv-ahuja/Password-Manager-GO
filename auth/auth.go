@@ -173,7 +173,7 @@ func UnsealEncryptionKey(pwFilePath string, values [][]byte) ([]byte, error) {
 	return encKey, nil
 }
 
-func Run(pwFilePath string) error {
+func Run(encInfoPath, pwFilePath string) error {
 
 	values, err := LoadEncryptedInfo(encInfoPath)
 	if err != nil {

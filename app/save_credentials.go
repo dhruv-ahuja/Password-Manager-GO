@@ -6,7 +6,7 @@ import (
 )
 
 // Save credentials to the database
-func SaveCredentials(encryptionKey []byte) error {
+func (DBConn *DBConn) SaveCredentials(encryptionKey []byte) error {
 
 	// define needed prompts
 	promptKey := "Enter key: "

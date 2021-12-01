@@ -9,7 +9,6 @@ import (
 	"syscall"
 
 	"github.com/good-times-ahead/password-manager-go/credentials"
-	"github.com/good-times-ahead/password-manager-go/database"
 	"github.com/good-times-ahead/password-manager-go/password"
 	"golang.org/x/term"
 )
@@ -81,9 +80,9 @@ func GetPassInput(argument string) []byte {
 }
 
 // Function to retrieve specific data from the table
-func RetrieveCredentials(query, key string, encryptionKey []byte) ([]credentials.Credentials, error) {
+func (DBConn *DBConn) RetrieveCredentials(query, key string, encryptionKey []byte) ([]credentials.Credentials, error) {
 
-	rows, err := database.DB.Query(query, "%"+key+"%")
+	rows, err := DBConn.Repo.DB.Query(query, "%"+key+"%")
 
 	if err != nil {
 		return nil, errors.New("error executing query")

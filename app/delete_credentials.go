@@ -4,18 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-
-	"github.com/good-times-ahead/password-manager-go/database"
 )
 
 // Function to allow users to delete credentials
-func DeleteCredentials(key string, encryptionKey []byte) error {
+func (DBConn *DBConn) DeleteCredentials(key string, encryptionKey []byte) error {
 
 	//"$" is postgres' equivalent of "?"
 	query := "SELECT * FROM info WHERE key ILIKE $1 ORDER BY id ASC;"
 
 	// call the function to retrieve credentials given relevant query
-	accountsList, err := RetrieveCredentials(query, key, encryptionKey)
+	accountsList, err := DBConn.RetrieveCredentials(query, key, encryptionKey)
 
 	if err != nil {
 		return err
@@ -53,7 +51,7 @@ func DeleteCredentials(key string, encryptionKey []byte) error {
 
 	deletionQuery := "DELETE FROM info WHERE ID=$1"
 
-	_, err = database.DB.Exec(deletionQuery, input)
+	_, err = DBConn.Repo.DB.Exec(deletionQuery, input)
 
 	if err != nil {
 		return errors.New("error deleting selected entry")
