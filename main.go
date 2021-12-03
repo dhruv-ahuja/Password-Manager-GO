@@ -29,10 +29,10 @@ func initialize() error {
 	}
 
 	// Generate database config
-	dbConfig := database.GenerateConfig()
+	dbConfig := database.NewConfig()
 
 	// Initialize connection to the database
-	dbVar, err := database.ConnecttoDB(dbConfig)
+	dbVar, err := database.NewConnection(dbConfig)
 
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func initialize() error {
 	// Get the Struct with DB connection and relevant methods
 	repo := database.NewDBRepo(dbVar)
 
-	dbConn := app.NewDBConn(repo)
+	dbConn := app.NewProgram(repo)
 
 	// Path to hashed master password file
 	pwFilePath := "./master_pw"

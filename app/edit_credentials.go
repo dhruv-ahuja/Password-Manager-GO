@@ -10,12 +10,12 @@ import (
 )
 
 // Function to allow the user to edit credentials
-func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
+func (p *Program) EditCredentials(key string, encryptionKey []byte) error {
 
 	query := "SELECT * FROM info WHERE key ILIKE $1 ORDER BY id ASC;"
 
 	// call the function to retrieve credentials given relevant query
-	accountsList, err := DBConn.RetrieveCredentials(query, key, encryptionKey)
+	accountsList, err := p.RetrieveCredentials(query, key, encryptionKey)
 
 	if err != nil {
 		return err
@@ -116,10 +116,10 @@ func (DBConn *DBConn) EditCredentials(key string, encryptionKey []byte) error {
 		// set modifyPassword to true
 		modifyPassword = true
 		// err = UpdateCredentials(modifyPassword)
-		err = DBConn.Repo.UpdateCredentials(modifyPassword, selection)
+		err = p.Repo.UpdateCredentials(modifyPassword, selection)
 
 	} else {
-		err = DBConn.Repo.UpdateCredentials(modifyPassword, selection)
+		err = p.Repo.UpdateCredentials(modifyPassword, selection)
 	}
 
 	if err != nil {

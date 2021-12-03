@@ -5,7 +5,7 @@ import (
 )
 
 // Save credentials to the database
-func (DBConn *DBConn) SaveCredentials(encryptionKey []byte) error {
+func (p *Program) SaveCredentials(encryptionKey []byte) error {
 
 	// define needed prompts
 	promptKey := "Enter key: "
@@ -26,7 +26,7 @@ func (DBConn *DBConn) SaveCredentials(encryptionKey []byte) error {
 	}
 
 	// save the credentials to the database
-	if saveToDB := DBConn.Repo.InsertIntoDB(encryptedPassword, usrInfo); saveToDB != nil {
+	if saveToDB := p.Repo.InsertIntoDB(encryptedPassword, usrInfo); saveToDB != nil {
 		return saveToDB
 	}
 

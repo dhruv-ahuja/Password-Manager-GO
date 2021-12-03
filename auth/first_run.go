@@ -110,7 +110,7 @@ func SaveMasterPassword(pwFilePath string, hashedMasterPassword []byte) error {
 
 }
 
-func GenerateEncryptionKey() ([]byte, error) {
+func NewEncryptionKey() ([]byte, error) {
 
 	// generate a new encryption key
 	encryptionKey := make([]byte, 32)
@@ -164,7 +164,7 @@ func SaveEncryptionData(encInfoPath string, values [][]byte) error {
 func FirstRun(encInfoPath, pwFilePath string) error {
 
 	// generate encryption key at the very start
-	encKey, err := GenerateEncryptionKey()
+	encKey, err := NewEncryptionKey()
 
 	if err != nil {
 		return err
