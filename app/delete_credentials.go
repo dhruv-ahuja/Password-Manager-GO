@@ -6,13 +6,13 @@ import (
 )
 
 // Function to allow users to delete credentials
-func (DBConn *DBConn) DeleteCredentials(key string, encryptionKey []byte) error {
+func (p *Program) DeleteCredentials(key string, encryptionKey []byte) error {
 
 	//"$" is postgres' equivalent of "?"
 	query := "SELECT * FROM info WHERE key ILIKE $1 ORDER BY id ASC;"
 
 	// call the function to retrieve credentials given relevant query
-	accountsList, err := DBConn.RetrieveCredentials(query, key, encryptionKey)
+	accountsList, err := p.RetrieveCredentials(query, key, encryptionKey)
 
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func (DBConn *DBConn) DeleteCredentials(key string, encryptionKey []byte) error 
 
 	deletionQuery := "DELETE FROM info WHERE ID=$1"
 
-	_, err = DBConn.Repo.DB.Exec(deletionQuery, usrInput)
+	_, err = p.Repo.DB.Exec(deletionQuery, usrInput)
 
 	if err != nil {
 		return errors.New("error deleting selected entry")

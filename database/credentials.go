@@ -5,6 +5,9 @@ import (
 	"fmt"
 )
 
+// This file contains functions that interact with the DB to
+// either save or update user credentials
+
 type CredentialFuncs interface {
 	InsertIntoDB(string, map[string]string) error
 

@@ -29,10 +29,10 @@ func initialize() error {
 	}
 
 	// Generate database config
-	dbConfig := database.GenerateConfig()
+	dbConfig := database.NewConfig()
 
 	// Initialize connection to the database
-	dbVar, err := database.ConnecttoDB(dbConfig)
+	dbVar, err := database.NewConnection(dbConfig)
 
 	if err != nil {
 		return err

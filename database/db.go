@@ -26,17 +26,40 @@ func NewDBRepo(db *sql.DB) *Repo {
 	return &Repo{DB: db}
 }
 
-func GenerateConfig() Config {
+// NewConfig returns a new Config instance containing all necessary
+func NewConfig() Config {
 
-	var c Config
+	return Config{
+		host:     os.Getenv("HOST"),
+		port:     os.Getenv("PORT"),
+		user:     os.Getenv("DB_USER"),
+		password: os.Getenv("DB_PASSWORD"),
+		dbname:   os.Getenv("DB_NAME"),
+	}
+}
 
-	c.host = os.Getenv("HOST")
-	c.port = os.Getenv("PORT")
-	c.user = os.Getenv("DB_USER")
-	c.password = os.Getenv("DB_PASSWORD")
-	c.dbname = os.Getenv("DB_NAME")
+//Connect to database, return the connection variable for usage throughout program
+func NewConnection(c Config) (*sql.DB, error) {
 
-	return c
+	// Prepare postgres connection parameters
+	psqlInfo := fmt.Sprint("host=", c.host, " port=", c.port, " user=", c.user, " password=", c.password, " dbname=", c.dbname, " sslmode=disable")
+
+	// Establish connection
+	db, err := sql.Open("postgres", psqlInfo)
+
+	if err != nil {
+		return nil, errors.New("error establishing connection to postgres, please check your parameters")
+	}
+
+	// Ping to confirm whether connection works
+	if err = db.Ping(); err != nil {
+		return nil, errors.New("unable to ping the database")
+	}
+
+	fmt.Println("Connected to the Database successfully!")
+
+	return db, nil
+
 }
 
 // Check whether the table to use exists or not

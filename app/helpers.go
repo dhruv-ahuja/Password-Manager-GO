@@ -13,9 +13,9 @@ import (
 )
 
 // Function to retrieve specific data from the table
-func (DBConn *DBConn) RetrieveCredentials(query, key string, encryptionKey []byte) ([]map[string]string, error) {
+func (p *Program) RetrieveCredentials(query, key string, encryptionKey []byte) ([]map[string]string, error) {
 
-	rows, err := DBConn.Repo.DB.Query(query, "%"+key+"%")
+	rows, err := p.Repo.DB.Query(query, "%"+key+"%")
 
 	if err != nil {
 		return nil, errors.New("error executing query")

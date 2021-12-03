@@ -20,56 +20,51 @@ type AppFuncs interface {
 }
 
 // struct that stores a struct that stores the database connection
-type DBConn struct {
+type Program struct {
 	Repo *database.Repo
 }
 
-func NewDBConn(db *database.Repo) *DBConn {
-	return &DBConn{
+func NewProgram(db *database.Repo) *Program {
+	return &Program{
 		Repo: db,
 	}
 }
 
 // Take user input to dictate what function gets executed
-func (DBConn *DBConn) TakeInput(usrInput string, encryptionKey []byte) error {
+func (p *Program) TakeInput(usrInput string, encryptionKey []byte) error {
 
 	switch usrInput {
 
 	case "1":
 		// returning function directly since it's supposed to return an error anyway
-		return DBConn.SaveCredentials(encryptionKey)
+		return p.SaveCredentials(encryptionKey)
 
 	case "2":
 		askForKey := "Enter the key to retrieve accounts for: "
 		key := GetInput(askForKey)
 
-		return DBConn.ViewCredentials(key, encryptionKey)
+		return p.ViewCredentials(key, encryptionKey)
 
 	case "3":
 		askForKey := "Enter the key to edit credentials for: "
 		key := GetInput(askForKey)
 
-		return DBConn.EditCredentials(key, encryptionKey)
+		return p.EditCredentials(key, encryptionKey)
 
 	case "4":
 		askForKey := "Enter the website to delete credentials for: "
 		key := GetInput(askForKey)
 
-		return DBConn.DeleteCredentials(key, encryptionKey)
+		return p.DeleteCredentials(key, encryptionKey)
 
 	case "0":
 		os.Exit(0)
 
 	default:
 		fmt.Println("Invalid input!")
-		DBConn.test()
 
 	}
 
 	return nil
 
-}
-
-func (DB *DBConn) test() {
-	fmt.Println("OK")
 }
