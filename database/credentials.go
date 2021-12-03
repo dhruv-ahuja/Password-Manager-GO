@@ -27,7 +27,7 @@ func (conn *Repo) InsertIntoDB(encryptedPassword string, credentials map[string]
 		return errors.New("unable to save your credentials to the database")
 	}
 
-	fmt.Println("Saved your credentials to the database!")
+	fmt.Println("\nSaved your credentials to the database!")
 
 	return nil
 

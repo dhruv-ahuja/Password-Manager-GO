@@ -37,7 +37,7 @@ func (p *Program) EditCredentials(key string, encryptionKey []byte) error {
 		usrInput = GetInput(msg)
 
 		for _, entry := range accountsList {
-			fmt.Println(entry)
+
 			if entry["id"] == usrInput {
 				selectID = true
 			}

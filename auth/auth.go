@@ -72,9 +72,9 @@ func LoadEncryptedInfo(encInfoPath string) ([][]byte, error) {
 
 	count := 0
 
-	var salt, sealedKey, nonce []byte
+	var salt, sealedKey []byte
 
-	// order: 1. salt, 2. sealedkey, 3. nonce
+	// order: 1. salt, 2. sealedkey
 	for scanner.Scan() {
 
 		count += 1
@@ -92,7 +92,7 @@ func LoadEncryptedInfo(encInfoPath string) ([][]byte, error) {
 
 	}
 
-	values := [][]byte{salt, sealedKey, nonce}
+	values := [][]byte{salt, sealedKey}
 
 	// returning file.Close() since the function will return an error. Deferring it means ignoring any errors that might occur, which can lead to data loss while the program continues functioning under the assumption that everything went well.
 	return values, file.Close()
@@ -160,7 +160,7 @@ func UnsealEncryptionKey(pwFilePath string, values [][]byte) ([]byte, error) {
 	hashedPassword, err := os.ReadFile(pwFilePath)
 
 	if err != nil {
-		return nil, errors.New("error when trying to read master password file, please check")
+		return nil, fmt.Errorf("error when trying to read master password: %s", err)
 	}
 
 	// the main data is stored from the 25th byte onwards
@@ -173,18 +173,26 @@ func UnsealEncryptionKey(pwFilePath string, values [][]byte) ([]byte, error) {
 	return encKey, nil
 }
 
-func Run(encInfoPath, pwFilePath string) error {
+func Run(encInfoPath, pwFilePath string) ([]byte, error) {
 
-	values, err := LoadEncryptedInfo(encInfoPath)
+	// load encrypted data to use when dealing with credentials later
+	encData, err := LoadEncryptedInfo(encInfoPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = AuthorizeUser(pwFilePath, values)
+	err = AuthorizeUser(pwFilePath, encData)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	// now, to unseal the encryption key
+	encryptionKey, err := UnsealEncryptionKey(pwFilePath, encData)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return encryptionKey, nil
 
 }
