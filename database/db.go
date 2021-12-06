@@ -21,7 +21,7 @@ type Config struct {
 	dbname   string
 }
 
-// attempting to implement Data Injection/Inversion *sweat*
+// attempting to implement Data Injection *sweat*
 func NewDBRepo(db *sql.DB) *Repo {
 	return &Repo{DB: db}
 }

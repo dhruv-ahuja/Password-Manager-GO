@@ -27,6 +27,8 @@ func main() {
 
 	dbConn, err := database.NewConnection(dbConfig)
 
+	defer dbConn.Close()
+
 	if err != nil {
 		log.Fatal(err)
 	}
