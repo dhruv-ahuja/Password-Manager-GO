@@ -1,5 +1,5 @@
 # Introduction
-### `NOTE: The project should NOT be used to store sensitive data of any kind in real life. `
+### `NOTE: The application should NOT be used to store sensitive data of any kind in real life. `
 
 This is my first project in Go, a password manager application. A humble attempt at execution of an idea I've had for some time now. The application can save, view, edit and delete credentials. You can add multiple credentials for a single website. A simplistic textual interface is used to get things done. 
 
