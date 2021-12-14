@@ -16,6 +16,7 @@ func main() {
 	// Path to hashed master password file & encrypted data
 	pwFilePath := "./master_pw"
 	encInfoPath := "./encrypted_data"
+	sqlFilePath := "./database/setup.sql"
 
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(
@@ -41,7 +42,7 @@ func main() {
 
 	if !checkEncData {
 
-		if err := program.Repo.MakeTable(); err != nil {
+		if err := program.Repo.ManageTable(sqlFilePath); err != nil {
 			log.Fatal(err)
 		}
 

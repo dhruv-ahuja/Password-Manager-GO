@@ -9,6 +9,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type DBFuncs interface {
+	TableExists() error
+
+	MakeTable() error
+}
+
+// attempting to implement Data Injection *sweat*
 type Repo struct {
 	DB *sql.DB
 }
@@ -21,12 +28,12 @@ type Config struct {
 	dbname   string
 }
 
-// attempting to implement Data Injection *sweat*
 func NewDBRepo(db *sql.DB) *Repo {
 	return &Repo{DB: db}
 }
 
-// NewConfig returns a new Config instance containing all necessary
+// NewConfig returns a new Config instance containing
+// all necessary connection parameters
 func NewConfig() Config {
 
 	return Config{
@@ -42,13 +49,15 @@ func NewConfig() Config {
 func NewConnection(c Config) (*sql.DB, error) {
 
 	// Prepare postgres connection parameters
-	psqlInfo := fmt.Sprint("host=", c.host, " port=", c.port, " user=", c.user, " password=", c.password, " dbname=", c.dbname, " sslmode=disable")
+	psqlInfo := fmt.Sprint("host=", c.host, " port=", c.port,
+		" user=", c.user, " password=", c.password,
+		" dbname=", c.dbname, " sslmode=disable")
 
 	// Establish connection
 	db, err := sql.Open("postgres", psqlInfo)
 
 	if err != nil {
-		return nil, errors.New("error establishing connection to postgres, please check your parameters")
+		return nil, errors.New("error connecting to postgres, please check")
 	}
 
 	// Ping to confirm whether connection works
@@ -62,47 +71,57 @@ func NewConnection(c Config) (*sql.DB, error) {
 
 }
 
-// Check whether the table to use exists or not
-func (conn *Repo) TableExists() error {
-	// Returns error if table does not exist.
-	query := "SELECT 'public.info'::regclass"
+// ManageTable acts as a type of a controller method, an attempt to
+// make testing easier for the functions in "DBFuncs" interface
+func (conn *Repo) ManageTable(sqlFilePath string) error {
 
-	// _, err := DB.Exec(query)
-	_, err := conn.DB.Exec(query)
+	err := conn.TableExists()
 
 	if err != nil {
-		// an error means that the table doesn't exist, we need to call the MakeTable function
-		if err := conn.MakeTable(); err != nil {
-			return err
 
+		// An error means that the table doesn't exist
+		if err := conn.MakeTable(sqlFilePath); err != nil {
+			return err
 		}
 
-	} else {
-		// adding new lines to keep the interface clean and readable
-		fmt.Printf("Found existing table. Good to go!\n\n")
 	}
 
 	return nil
 
 }
 
+// Check whether the table to use exists or not
+func (conn *Repo) TableExists() error {
+	// Returns error if table does not exist.
+	query := "SELECT 'public.info'::regclass"
+
+	_, err := conn.DB.Exec(query)
+
+	if err != nil {
+		return err
+	}
+
+	// adding new lines to keep the interface clean and readable
+	fmt.Print("Found existing table. Good to go!\n\n")
+
+	return nil
+
+}
+
 // Make the table which we will use for all our operations
-func (conn *Repo) MakeTable() error {
+func (conn *Repo) MakeTable(sqlFilePath string) error {
 
 	fmt.Println("First-time execution; creating table...")
 
-	// Path to the relevant SQL file
-	path := "./database/setup.sql"
-
 	// Read the file content
-	queries, err := os.ReadFile(path)
+	query, err := os.ReadFile(sqlFilePath)
 
 	if err != nil {
 		return errors.New("setup.sql file not found or something was modified")
 	}
 
 	// Convert the slice to a string since the database connector only accepts strings for queries.
-	if _, err := conn.DB.Exec(string(queries)); err != nil {
+	if _, err := conn.DB.Exec(string(query)); err != nil {
 		return errors.New("unable to make table 'info'")
 	}
 
