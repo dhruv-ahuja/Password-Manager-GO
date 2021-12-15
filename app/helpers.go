@@ -29,12 +29,10 @@ func (p *Program) RetrieveCredentials(query, key string, encryptionKey []byte) (
 		usrInfo := make(map[string]string, 3)
 		var id, key, base64Password string
 
-		// Write scanned values to credentials struct except for the password,
-		// which needs to be decrypted
+		// Write scanned values to map
 		err := rows.Scan(&id, &key, &base64Password)
 
 		if err != nil {
-			// return nil, errors.New("error attempting to retrieve data from query: ", err)
 			return nil, fmt.Errorf("error attempting to retrieve data from query: %s", err)
 		}
 
@@ -117,7 +115,7 @@ func GetInput(argument string) string {
 
 }
 
-// GetPassInput takes input using term.ReadPassword(), preventing user input echo
+// GetPassInput receives user's input securely, without any echo
 func GetPassInput(argument string) []byte {
 
 	// Emulate a while loop to receive user input and ensure its' validity

@@ -17,7 +17,6 @@ type CredentialFuncs interface {
 // Reads all struct fields and inserts them into the database
 func (conn *Repo) InsertIntoDB(encryptedPassword string, credentials map[string]string) error {
 
-	//TODO: add credentials parameter of type map containing all necessary data
 	// TODO: return the result of the executed query
 	query := "INSERT INTO info (key, encrypted_pw) VALUES ($1, $2) RETURNING *"
 

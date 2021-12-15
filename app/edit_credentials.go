@@ -28,6 +28,7 @@ func (p *Program) EditCredentials(key string, encryptionKey []byte) error {
 
 	selectID := false
 	usrInput := ""
+	selection := make(map[string]string, 3)
 
 	for !selectID {
 
@@ -40,26 +41,15 @@ func (p *Program) EditCredentials(key string, encryptionKey []byte) error {
 
 			if entry["id"] == usrInput {
 				selectID = true
+				selection = entry
+				break
 			}
 		}
 
-		if selectID {
-			break
+		if !selectID {
+			fmt.Println("Entered ID outside range!")
 		}
 
-		fmt.Println("Entered ID outside range!")
-	}
-
-	// Preparing struct variable to store users' desired entry
-	// var selection credentials.Credentials
-	selection := make(map[string]string, 3)
-
-	for _, usrInfo := range accountsList {
-		if usrInput == usrInfo["id"] {
-
-			selection = usrInfo
-
-		}
 	}
 
 	// Now, we have the users' choice of entry, allow them to edit whatever field they want
@@ -76,7 +66,7 @@ func (p *Program) EditCredentials(key string, encryptionKey []byte) error {
 		return err
 	}
 
-	fmt.Println("Your current password is: ", selection["password"])
+	fmt.Println("\nYour current password is: ", selection["password"])
 	passPrompt := "Enter new password: "
 
 	getUserPass := GetPassInput(passPrompt)
@@ -90,41 +80,17 @@ func (p *Program) EditCredentials(key string, encryptionKey []byte) error {
 		selection["key"] = newKey
 	}
 
-	var b64Password string
-
-	if newPassword != "" {
-
-		selection["password"] = newPassword
-
-		// encrypt updated password
-		b64Password, err = password.Encrypt(encryptionKey, selection["password"])
-
-		if err != nil {
-			return err
-		}
-	}
-
-	// Now, to finally save the new details
-
-	// declaring flag modifyPassword
-	modifyPassword := false
-
-	if b64Password != "" {
-		// Set b64Password as struct field only if modified (i.e., not empty)
-		selection["password"] = b64Password
-
-		// set modifyPassword to true
-		modifyPassword = true
-		// err = UpdateCredentials(modifyPassword)
-		err = p.Repo.UpdateCredentials(modifyPassword, selection)
-
-	} else {
-		err = p.Repo.UpdateCredentials(modifyPassword, selection)
-	}
+	// prepare to encrypt password
+	b64Password, err := password.Encrypt(encryptionKey, newPassword)
 
 	if err != nil {
 		return err
 	}
+
+	// now, update the selection dict/map and send it to the database
+	selection["password"] = b64Password
+
+	p.Repo.UpdateCredentials(true, selection)
 
 	fmt.Println("Updated your credentials successfully!")
 
