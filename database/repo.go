@@ -10,9 +10,7 @@ import (
 )
 
 type DBFuncs interface {
-	TableExists() error
-
-	MakeTable() error
+	MakeTable(string) error
 }
 
 // attempting to implement Data Injection *sweat*
@@ -68,43 +66,6 @@ func NewConnection(c Config) (*sql.DB, error) {
 	fmt.Println("Connected to the Database successfully!")
 
 	return db, nil
-
-}
-
-// ManageTable acts as a type of a controller method, an attempt to
-// make testing easier for the functions in "DBFuncs" interface
-func (conn *Repo) ManageTable(sqlFilePath string) error {
-
-	err := conn.TableExists()
-
-	if err != nil {
-
-		// An error means that the table doesn't exist
-		if err := conn.MakeTable(sqlFilePath); err != nil {
-			return err
-		}
-
-	}
-
-	return nil
-
-}
-
-// Check whether the table to use exists or not
-func (conn *Repo) TableExists() error {
-	// Returns error if table does not exist.
-	query := "SELECT 'public.info'::regclass"
-
-	_, err := conn.DB.Exec(query)
-
-	if err != nil {
-		return err
-	}
-
-	// adding new lines to keep the interface clean and readable
-	fmt.Print("Found existing table. Good to go!\n\n")
-
-	return nil
 
 }
 

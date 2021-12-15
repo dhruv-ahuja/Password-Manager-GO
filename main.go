@@ -42,17 +42,13 @@ func main() {
 
 	if !checkEncData {
 
-		if err := program.Repo.ManageTable(sqlFilePath); err != nil {
+		if err := program.Repo.MakeTable(sqlFilePath); err != nil {
 			log.Fatal(err)
 		}
 
 		if err := auth.FirstRun(encInfoPath, pwFilePath); err != nil {
 			log.Fatal(err)
 		}
-	}
-
-	if err := program.Repo.TableExists(); err != nil {
-		log.Fatal(err)
 	}
 
 	encryptionKey, err := auth.Run(encInfoPath, pwFilePath)
