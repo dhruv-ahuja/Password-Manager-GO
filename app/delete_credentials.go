@@ -28,8 +28,8 @@ func (p *Program) DeleteCredentials(key string, encryptionKey []byte) error {
 
 	for !selectID {
 
-		// Get users' input to find the entry they want to modify
-		msg := "Enter the ID No. of the entry you want to modify: "
+		// Get users' input to find the entry they want to delete
+		msg := "Enter the ID No. of the entry you want to delete: "
 
 		usrInput = GetInput(msg)
 

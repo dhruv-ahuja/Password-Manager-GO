@@ -1,4 +1,4 @@
-package Store
+package store
 
 import (
 	"bufio"
@@ -11,6 +11,7 @@ import (
 )
 
 type DBStore struct {
+	conn     *sql.DB
 	host     string
 	port     string
 	user     string
@@ -18,8 +19,6 @@ type DBStore struct {
 	dbname   string
 }
 
-// NewDBStore returns a new DBStore instance containing
-// all necessary connection parameters
 func NewDBStore() DBStore {
 
 	return DBStore{
@@ -29,35 +28,35 @@ func NewDBStore() DBStore {
 		password: os.Getenv("DB_PASSWORD"),
 		dbname:   os.Getenv("DB_NAME"),
 	}
+
 }
 
-func (db DBStore) NewConnection() (*sql.DB, error) {
+func (db *DBStore) NewConn() error {
 	// Prepare Postgres connection parameters
-	psqlInfo := fmt.Sprint("host=", db.host, " port=", db.port,
-		" user=", db.user, " password=", db.password,
-		" dbname=", db.dbname, " sslmode=disable")
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", db.host, db.port, db.user, db.password, db.dbname)
 
 	conn, err := sql.Open("postgres", psqlInfo)
 
 	if err != nil {
-		fmt.Println("error connecting to database!")
-		return nil, err
+		return fmt.Errorf("error connecting to postgres database: %s", err)
 	}
 
 	// Ping to confirm whether connection works
 	if err := conn.Ping(); err != nil {
-		fmt.Println("error pinging database!")
-		return nil, err
+		return fmt.Errorf("error pinging postgres database: %s", err)
+
 	}
 
 	fmt.Println("Connected to the database successfully!")
 
-	return conn, nil
+	db.conn = conn
+
+	return nil
 
 }
 
 // MakeTable creates the table to be used for our database-related operations
-func (db DBStore) CreateTable(sqlFilePath string, conn *sql.DB) error {
+func (db *DBStore) CreateTable(sqlFilePath string) error {
 
 	fmt.Println("First-time execution; creating table...")
 
@@ -69,7 +68,7 @@ func (db DBStore) CreateTable(sqlFilePath string, conn *sql.DB) error {
 		return err
 	}
 
-	if _, err := conn.Exec(string(query)); err != nil {
+	if _, err := db.conn.Exec(string(query)); err != nil {
 		fmt.Println("unable to create table!")
 		return err
 	}
@@ -84,7 +83,7 @@ func (db DBStore) CreateTable(sqlFilePath string, conn *sql.DB) error {
 // Interface functions
 
 // SaveCreds saves the user-entered credentials to the database
-func (db DBStore) SaveCreds(encryptionKey []byte, conn *sql.DB) error {
+func (db *DBStore) SaveCreds(encryptionKey []byte) error {
 	// define needed prompts
 	promptKey := "Enter key: "
 	promptPassword := "Enter your password(it will be encrypted before saving): "
@@ -104,7 +103,7 @@ func (db DBStore) SaveCreds(encryptionKey []byte, conn *sql.DB) error {
 	}
 
 	// save the credentials to the database
-	if err := db.InsertIntoDB(encryptedPassword, usrInfo, conn); err != nil {
+	if err := db.InsertIntoDB(encryptedPassword, usrInfo); err != nil {
 		return err
 	}
 
@@ -113,10 +112,10 @@ func (db DBStore) SaveCreds(encryptionKey []byte, conn *sql.DB) error {
 }
 
 // RetrieveCreds retrieves userdata from the database given respective query
-func (db DBStore) RetrieveCreds(query, key string, encryptionKey []byte, conn *sql.DB) ([]map[string]string, error) {
+func (db *DBStore) RetrieveCreds(query, key string, encryptionKey []byte) ([]map[string]string, error) {
 
 	// implementing ILIKE search using the 2 "%" signs
-	rows, err := conn.Query(query, "%"+key+"%")
+	rows, err := db.conn.Query(query, "%"+key+"%")
 
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %s", err)
@@ -162,11 +161,11 @@ func (db DBStore) RetrieveCreds(query, key string, encryptionKey []byte, conn *s
 	return credList, nil
 }
 
-func (db DBStore) ViewCreds(key string, encryptionKey []byte, conn *sql.DB) error {
+func (db *DBStore) ViewCreds(key string, encryptionKey []byte) error {
 	// get all accounts associated with the website
 	query := "SELECT * FROM info WHERE key ILIKE $1 ORDER BY id ASC;"
 
-	_, err := db.RetrieveCreds(query, key, encryptionKey, conn)
+	_, err := db.RetrieveCreds(query, key, encryptionKey)
 
 	if err != nil {
 		return err
@@ -176,12 +175,12 @@ func (db DBStore) ViewCreds(key string, encryptionKey []byte, conn *sql.DB) erro
 
 }
 
-func (db DBStore) EditCreds(key string, encryptionKey []byte, conn *sql.DB) error {
+func (db *DBStore) EditCreds(key string, encryptionKey []byte) error {
 
 	query := "SELECT * FROM info WHERE key ILIKE $1 ORDER BY id ASC;"
 
 	// retrieve the saved account list first
-	credList, err := db.RetrieveCreds(query, key, encryptionKey, conn)
+	credList, err := db.RetrieveCreds(query, key, encryptionKey)
 
 	if err != nil {
 		return err
@@ -256,48 +255,92 @@ func (db DBStore) EditCreds(key string, encryptionKey []byte, conn *sql.DB) erro
 	// now, update the selection dict/map and send it to the database
 	selection["password"] = b64Password
 
-	db.UpdateCreds(selection, conn)
+	db.UpdateCreds(selection)
 
 	fmt.Println("Updated your credentials successfully!")
 
 	return nil
 }
 
+func (db *DBStore) DeleteCreds(key string, encryptionKey []byte) error {
+
+	query := "SELECT * FROM info WHERE key ILIKE $1 ORDER BY id ASC;"
+
+	// retrieve list of matching credentials
+	credList, err := db.RetrieveCreds(query, key, encryptionKey)
+
+	if err != nil {
+		return err
+	}
+
+	if len(credList) == 0 {
+		return nil
+	}
+
+	selectID := false
+	var usrInput string
+	selection := make(map[string]string, 3)
+
+	for !selectID {
+
+		// Get users' input to find the entry they want to delete
+		msg := "Enter the ID No. of the entry you want to delete: "
+
+		usrInput = GetInput(msg)
+
+		for _, entry := range credList {
+
+			if entry["id"] == usrInput {
+				selectID = true
+				selection = entry
+				break
+			}
+		}
+
+		if !selectID {
+			fmt.Println("Entered ID outside range!")
+		}
+
+	}
+
+	deletionQuery := "DELETE FROM info WHERE ID=$1;"
+
+	_, err = db.conn.Exec(deletionQuery, selection["id"])
+
+	if err != nil {
+		return fmt.Errorf("error deleting entry: %s", err)
+	}
+
+	fmt.Println("Successfully deleted selected entry!")
+
+	return nil
+
+}
+
 // Now adding functions that shall help us insert new and update exisitng data in the table
 
-func (db DBStore) InsertIntoDB(encryptedPassword string, creds map[string]string, conn *sql.DB) error {
+func (db *DBStore) InsertIntoDB(encryptedPassword string, creds map[string]string) error {
 
-	query := "INSERT INTO info (key, encrypted_pw) VALUES ($1, $2) RETURNING (id, key)"
+	query := "INSERT INTO info (key, encrypted_pw) VALUES ($1, $2)"
 
-	var id int
-	var key string
+	_, err := db.conn.Exec(query, creds["key"], encryptedPassword)
 
-	output := conn.QueryRow(query, creds["key"], encryptedPassword)
-
-	switch err := output.Scan(&id, &key); err {
-	case sql.ErrNoRows:
-		return fmt.Errorf("No rows returned by query: %s", err)
-
-	case nil:
-		fmt.Println("Saved your credentials to the database!")
-
-		fmt.Printf("\nID: %d, Key: %s", id, key)
-
-	default:
+	if err != nil {
 		return fmt.Errorf("unable to insert into DB: %s", err)
 	}
 
+	fmt.Println("Saved your credentials to the database!")
 	fmt.Println()
 
 	return nil
 
 }
 
-func (DB DBStore) UpdateCreds(creds map[string]string, conn *sql.DB) error {
+func (db *DBStore) UpdateCreds(creds map[string]string) error {
 
 	query := "UPDATE info SET key = $1, encrypted_pw = $2  WHERE id= $3"
 
-	_, err := conn.Exec(query, creds["key"], creds["password"], creds["id"])
+	_, err := db.conn.Exec(query, creds["key"], creds["password"], creds["id"])
 
 	if err != nil {
 		return fmt.Errorf("error updating credentials: %s", err)

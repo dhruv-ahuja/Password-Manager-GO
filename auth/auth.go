@@ -63,7 +63,7 @@ func LoadEncryptedInfo(encInfoPath string) ([][]byte, error) {
 	file, err := os.Open(encInfoPath)
 
 	if err != nil {
-		return nil, errors.New("error reading from encrypted data file, please check")
+		return nil, fmt.Errorf("error reading encrypted data: %s", err)
 	}
 
 	// defer file.Close()
@@ -105,7 +105,7 @@ func AuthorizeUser(pwFilePath string, values [][]byte) error {
 	hashedPassword, err := os.ReadFile(pwFilePath)
 
 	if err != nil {
-		return errors.New("error when trying to read master password file, please check")
+		return fmt.Errorf("error reading master password: %s", err)
 	}
 
 	// infinite loop till user enters the correct value
@@ -125,7 +125,7 @@ func AuthorizeUser(pwFilePath string, values [][]byte) error {
 		}
 
 		// adding new lines to keep the interface clean and readable
-		fmt.Printf("The passwords do not match! Try again.\n\n")
+		fmt.Printf("\nThe passwords do not match! Try again.\n\n")
 
 	}
 
