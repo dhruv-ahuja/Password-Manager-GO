@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/good-times-ahead/password-manager-go/app"
+	"github.com/good-times-ahead/password-manager-go/store"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/nacl/secretbox"
 )
@@ -113,7 +113,7 @@ func AuthorizeUser(pwFilePath string, values [][]byte) error {
 
 		// Take user input
 		prompt := "Enter the Master Password: "
-		usrPassword := app.GetPassInput(prompt)
+		usrPassword := store.GetPassInput(prompt)
 		// convert the received slice of bytes to string
 		usrInput := string(usrPassword)
 
