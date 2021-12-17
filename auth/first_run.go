@@ -26,7 +26,7 @@ Set a secure password and remember it since there will be no way to recover it!
 	// use App packages' GetPassInput function
 	var usrInput string
 
-	for true {
+	for {
 
 		prompt := "Enter desired Master Password(should contain a combination of atleast 1 lowercase, 1 uppercase letter and a number; minimum length: 8 characters): "
 
