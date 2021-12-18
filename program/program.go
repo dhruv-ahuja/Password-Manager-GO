@@ -20,16 +20,13 @@ func New() Program {
 // Init injects the store interface into Program
 func (p *Program) Init(pwFilePath, encInfoPath, sqlFilePath string) error {
 
-	dbStore := store.NewDBStore()
-
-	// connecting to postgres database
-	err := dbStore.NewConn()
+	dbStore, err := store.NewDBStore()
 
 	if err != nil {
 		return err
 	}
 
-	p.store = &dbStore
+	p.store = dbStore
 
 	// running necessary checks and the like
 	checkEncData := auth.CheckEncryptedData(encInfoPath)

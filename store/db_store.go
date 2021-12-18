@@ -237,7 +237,7 @@ func (db *DBStore) EditCreds(key string, encryptionKey []byte) error {
 		selection["key"] = newKey
 	}
 
-	fmt.Println("\nYour current password is: ", selection["password"])
+	fmt.Println("Your current password is: ", selection["password"])
 
 	newPassPrompt := "Enter new password: "
 
