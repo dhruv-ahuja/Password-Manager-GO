@@ -1,4 +1,4 @@
-CREATE TABLE info (
+CREATE TABLE IF NOT EXISTS info (
     id SERIAL PRIMARY KEY, 
     key VARCHAR(128) NOT NULL, 
     encrypted_pw VARCHAR(128) NOT NULL);

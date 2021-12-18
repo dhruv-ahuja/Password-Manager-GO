@@ -11,7 +11,7 @@ import (
 )
 
 type DBStore struct {
-	conn     *sql.DB
+	Conn     *sql.DB
 	host     string
 	port     string
 	user     string
@@ -19,9 +19,9 @@ type DBStore struct {
 	dbname   string
 }
 
-func NewDBStore() DBStore {
-
-	return DBStore{
+func NewDBStore() (*DBStore, error) {
+	// Initializing the DBStore struct that is our interface as well
+	db := DBStore{
 		host:     os.Getenv("HOST"),
 		port:     os.Getenv("PORT"),
 		user:     os.Getenv("DB_USER"),
@@ -29,29 +29,27 @@ func NewDBStore() DBStore {
 		dbname:   os.Getenv("DB_NAME"),
 	}
 
-}
-
-func (db *DBStore) NewConn() error {
 	// Prepare Postgres connection parameters
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", db.host, db.port, db.user, db.password, db.dbname)
 
 	conn, err := sql.Open("postgres", psqlInfo)
 
 	if err != nil {
-		return fmt.Errorf("error connecting to postgres database: %s", err)
+		return &DBStore{}, fmt.Errorf("error connecting to postgres database: %s", err)
 	}
 
 	// Ping to confirm whether connection works
 	if err := conn.Ping(); err != nil {
-		return fmt.Errorf("error pinging postgres database: %s", err)
+		return &DBStore{}, fmt.Errorf("error pinging postgres database: %s", err)
 
 	}
 
 	fmt.Println("Connected to the database successfully!")
 
-	db.conn = conn
+	// The struct field now carries the network connection
+	db.Conn = conn
 
-	return nil
+	return &db, nil
 
 }
 
@@ -68,7 +66,7 @@ func (db *DBStore) CreateTable(sqlFilePath string) error {
 		return err
 	}
 
-	if _, err := db.conn.Exec(string(query)); err != nil {
+	if _, err := db.Conn.Exec(string(query)); err != nil {
 		fmt.Println("unable to create table!")
 		return err
 	}
@@ -115,7 +113,7 @@ func (db *DBStore) SaveCreds(encryptionKey []byte) error {
 func (db *DBStore) RetrieveCreds(query, key string, encryptionKey []byte) ([]map[string]string, error) {
 
 	// implementing ILIKE search using the 2 "%" signs
-	rows, err := db.conn.Query(query, "%"+key+"%")
+	rows, err := db.Conn.Query(query, "%"+key+"%")
 
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %s", err)
@@ -305,7 +303,7 @@ func (db *DBStore) DeleteCreds(key string, encryptionKey []byte) error {
 
 	deletionQuery := "DELETE FROM info WHERE ID=$1;"
 
-	_, err = db.conn.Exec(deletionQuery, selection["id"])
+	_, err = db.Conn.Exec(deletionQuery, selection["id"])
 
 	if err != nil {
 		return fmt.Errorf("error deleting entry: %s", err)
@@ -323,7 +321,7 @@ func (db *DBStore) InsertIntoDB(encryptedPassword string, creds map[string]strin
 
 	query := "INSERT INTO info (key, encrypted_pw) VALUES ($1, $2)"
 
-	_, err := db.conn.Exec(query, creds["key"], encryptedPassword)
+	_, err := db.Conn.Exec(query, creds["key"], encryptedPassword)
 
 	if err != nil {
 		return fmt.Errorf("unable to insert into DB: %s", err)
@@ -340,7 +338,7 @@ func (db *DBStore) UpdateCreds(creds map[string]string) error {
 
 	query := "UPDATE info SET key = $1, encrypted_pw = $2  WHERE id= $3"
 
-	_, err := db.conn.Exec(query, creds["key"], creds["password"], creds["id"])
+	_, err := db.Conn.Exec(query, creds["key"], creds["password"], creds["id"])
 
 	if err != nil {
 		return fmt.Errorf("error updating credentials: %s", err)
