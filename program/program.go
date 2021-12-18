@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/good-times-ahead/password-manager-go/app"
 	"github.com/good-times-ahead/password-manager-go/auth"
 	"github.com/good-times-ahead/password-manager-go/store"
 )
@@ -69,7 +68,7 @@ func (p *Program) Prompt(encryptionKey []byte) error {
 4. Delete a saved password
 0: Exit the application: `
 
-			usrInput := app.GetInput(mainMsg)
+			usrInput := store.GetInput(mainMsg)
 
 			if err := p.controller(usrInput, encryptionKey); err != nil {
 				return err

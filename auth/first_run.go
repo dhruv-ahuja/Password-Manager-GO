@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/good-times-ahead/password-manager-go/app"
+	"github.com/good-times-ahead/password-manager-go/store"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/nacl/secretbox"
 )
@@ -26,11 +26,11 @@ Set a secure password and remember it since there will be no way to recover it!
 	// use App packages' GetPassInput function
 	var usrInput string
 
-	for true {
+	for {
 
 		prompt := "Enter desired Master Password(should contain a combination of atleast 1 lowercase, 1 uppercase letter and a number; minimum length: 8 characters): "
 
-		usrPassword := app.GetPassInput(prompt)
+		usrPassword := store.GetPassInput(prompt)
 		usrInput = string(usrPassword)
 
 		checkInput := CheckPasswordStrength(usrInput)
