@@ -149,13 +149,6 @@ func (db *DBStore) RetrieveCreds(query, key string, encryptionKey []byte) ([]map
 		credList = append(credList, usrInfo)
 	}
 
-	// no such key in db if slice is empty
-	if len(credList) == 0 {
-		fmt.Println("Nothing found for that search entry!")
-	} else {
-		printEntries(credList)
-	}
-
 	return credList, nil
 }
 
@@ -163,10 +156,17 @@ func (db *DBStore) ViewCreds(key string, encryptionKey []byte) error {
 	// get all accounts associated with the website
 	query := "SELECT * FROM info WHERE key ILIKE $1 ORDER BY id ASC;"
 
-	_, err := db.RetrieveCreds(query, key, encryptionKey)
+	credList, err := db.RetrieveCreds(query, key, encryptionKey)
 
 	if err != nil {
 		return err
+	}
+
+	// no such key in db if slice is empty
+	if len(credList) == 0 {
+		fmt.Println("Nothing found for that search entry!")
+	} else {
+		printEntries(credList)
 	}
 
 	return nil
@@ -186,6 +186,7 @@ func (db *DBStore) EditCreds(key string, encryptionKey []byte) error {
 
 	// if no accounts found,
 	if len(credList) == 0 {
+		fmt.Println("No accounts found for that key!")
 		return nil
 	}
 
