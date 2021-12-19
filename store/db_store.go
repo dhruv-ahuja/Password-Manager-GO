@@ -254,7 +254,13 @@ func (db *DBStore) EditCreds(key string, encryptionKey []byte) error {
 	// now, update the selection dict/map and send it to the database
 	selection["password"] = b64Password
 
-	db.UpdateCreds(selection)
+	updateQuery := "UPDATE info SET key = $1, encrypted_pw = $2  WHERE id= $3"
+
+	_, err = db.Conn.Exec(updateQuery, selection["key"], selection["password"], selection["id"])
+
+	if err != nil {
+		return fmt.Errorf("error updating credentials: %s", err)
+	}
 
 	fmt.Println("Updated your credentials successfully!")
 
@@ -333,17 +339,4 @@ func (db *DBStore) InsertIntoDB(encryptedPassword string, creds map[string]strin
 
 	return nil
 
-}
-
-func (db *DBStore) UpdateCreds(creds map[string]string) error {
-
-	query := "UPDATE info SET key = $1, encrypted_pw = $2  WHERE id= $3"
-
-	_, err := db.Conn.Exec(query, creds["key"], creds["password"], creds["id"])
-
-	if err != nil {
-		return fmt.Errorf("error updating credentials: %s", err)
-	}
-
-	return nil
 }
