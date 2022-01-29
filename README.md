@@ -27,7 +27,3 @@ Create a .env file and set the environment variables using the ".env.example" fi
 Once done with the .env file, go ahead and create a database for the application. The table will be created automatically alongside the master password and encryption key on application first run.
 
 Finally, open your terminal and use the command in the project directory: ```go run main.go```
-
-# TODO
-1) Perhaps implement copying the password to the users' clipboard instead of just displaying it.
-2) Clean up table entries and implement ILIKE search functionality to improve user-experience.  
