@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/good-times-ahead/password-manager-go/app"
 	"github.com/good-times-ahead/password-manager-go/auth"
-	"github.com/good-times-ahead/password-manager-go/database"
+	"github.com/good-times-ahead/password-manager-go/program"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func main() {
 
-	// Path to hashed master password file & encrypted data
+	// Path to hashed master password file, encrypted data and SQL file
 	pwFilePath := "./master_pw"
 	encInfoPath := "./encrypted_data"
+	sqlFilePath := "./setup.sql"
 
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(
@@ -23,72 +23,25 @@ func main() {
 		)
 	}
 
-	dbConfig := database.NewConfig()
+	// Get a new struct instance
+	cli := program.New()
 
-	dbConn, err := database.NewConnection(dbConfig)
-
-	defer dbConn.Close()
+	// Init runs all initial checks and also sets up the database connection through store.DBStore
+	err := cli.Init(pwFilePath, encInfoPath, sqlFilePath)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	repo := database.NewDBRepo(dbConn)
-
-	program := app.NewProgram(repo)
-
-	checkEncData := auth.CheckEncryptedData(encInfoPath)
-
-	if !checkEncData {
-
-		if err := program.Repo.MakeTable(); err != nil {
-			log.Fatal(err)
-		}
-
-		if err := auth.FirstRun(encInfoPath, pwFilePath); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	if err := program.Repo.TableExists(); err != nil {
-		log.Fatal(err)
-	}
-
+	// This phase is only run after ensuring that encryption key, table and master password have been generated
 	encryptionKey, err := auth.Run(encInfoPath, pwFilePath)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Finally, start the app
-	if err := startApp(program, encryptionKey); err != nil {
+	if err := cli.Prompt(encryptionKey); err != nil {
 		log.Fatal(err)
 	}
-
-}
-
-func startApp(p *app.Program, encryptionKey []byte) error {
-
-	appPersist := true
-
-	for appPersist {
-		mainMsg := `Hello, what would you like to do?
-1. Save a password to the DB
-2. View a saved password
-3. Edit a saved password
-4. Delete a saved password
-0: Exit the application: `
-
-		usrInput := app.GetInput(mainMsg)
-
-		if err := p.TakeInput(usrInput, encryptionKey); err != nil {
-			return err
-		}
-		// adding new lines to keep the interface clean and readable
-		fmt.Println()
-
-	}
-
-	return nil
 
 }

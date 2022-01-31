@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/good-times-ahead/password-manager-go/app"
+	"github.com/good-times-ahead/password-manager-go/store"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/nacl/secretbox"
 )
@@ -63,7 +63,7 @@ func LoadEncryptedInfo(encInfoPath string) ([][]byte, error) {
 	file, err := os.Open(encInfoPath)
 
 	if err != nil {
-		return nil, errors.New("error reading from encrypted data file, please check")
+		return nil, fmt.Errorf("error reading encrypted data: %s", err)
 	}
 
 	// defer file.Close()
@@ -86,7 +86,6 @@ func LoadEncryptedInfo(encInfoPath string) ([][]byte, error) {
 		case 2:
 			sealedKey = []byte(scanner.Text())
 		default:
-			break
 
 		}
 
@@ -105,15 +104,15 @@ func AuthorizeUser(pwFilePath string, values [][]byte) error {
 	hashedPassword, err := os.ReadFile(pwFilePath)
 
 	if err != nil {
-		return errors.New("error when trying to read master password file, please check")
+		return fmt.Errorf("error reading master password: %s", err)
 	}
 
 	// infinite loop till user enters the correct value
-	for true {
+	for {
 
 		// Take user input
 		prompt := "Enter the Master Password: "
-		usrPassword := app.GetPassInput(prompt)
+		usrPassword := store.GetPassInput(prompt)
 		// convert the received slice of bytes to string
 		usrInput := string(usrPassword)
 
@@ -121,11 +120,11 @@ func AuthorizeUser(pwFilePath string, values [][]byte) error {
 
 		// if the stored hash matches the produced/current hash, allow the user to go through
 		if bytes.Equal(compare, hashedPassword) {
-			return nil
+			break
 		}
 
 		// adding new lines to keep the interface clean and readable
-		fmt.Printf("The passwords do not match! Try again.\n\n")
+		fmt.Printf("\nThe passwords do not match! Try again.\n\n")
 
 	}
 
@@ -141,14 +140,8 @@ func UnsealEncryptionKey(pwFilePath string, values [][]byte) ([]byte, error) {
 
 	for index, value := range values {
 
-		switch index {
-
-		case 1:
+		if index == 1 {
 			sealedKey = value
-
-		default:
-			break
-
 		}
 
 	}
