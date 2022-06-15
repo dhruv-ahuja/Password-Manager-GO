@@ -6,6 +6,7 @@ import (
 
 	"github.com/good-times-ahead/password-manager-go/auth"
 	"github.com/good-times-ahead/password-manager-go/program"
+	"github.com/good-times-ahead/password-manager-go/store"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -23,11 +24,19 @@ func main() {
 		)
 	}
 
+	dbStore, err := store.NewDBStore()
+
+	if err != nil {
+		log.Fatal(
+			fmt.Errorf("error initializing DBStore: %s", err),
+		)
+	}
+
 	// Get a new struct instance
-	cli := program.New()
+	cli := program.New(dbStore)
 
 	// Init runs all initial checks and also sets up the database connection through store.DBStore
-	err := cli.Init(pwFilePath, encInfoPath, sqlFilePath)
+	err = cli.Init(pwFilePath, encInfoPath, sqlFilePath)
 
 	if err != nil {
 		log.Fatal(err)

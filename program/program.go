@@ -13,27 +13,19 @@ type Program struct {
 	store store.Store
 }
 
-func New() Program {
-	return Program{}
+func New(dbStore *store.DBStore) *Program {
+	return &Program{store: dbStore}
 }
 
 // Init injects the store interface into Program
 func (p *Program) Init(pwFilePath, encInfoPath, sqlFilePath string) error {
-
-	dbStore, err := store.NewDBStore()
-
-	if err != nil {
-		return err
-	}
-
-	p.store = dbStore
 
 	// running necessary checks and the like
 	checkEncData := auth.CheckEncryptedData(encInfoPath)
 
 	if !checkEncData {
 
-		if err := dbStore.CreateTable(sqlFilePath); err != nil {
+		if err := p.store.CreateTable(sqlFilePath); err != nil {
 			return err
 		}
 

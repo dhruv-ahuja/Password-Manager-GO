@@ -53,7 +53,7 @@ func NewDBStore() (*DBStore, error) {
 
 }
 
-// MakeTable creates the table to be used for our database-related operations
+// CreateTable creates the table to be used for our database-related operations
 func (db *DBStore) CreateTable(sqlFilePath string) error {
 
 	fmt.Println("First-time execution; creating table...")
@@ -77,8 +77,6 @@ func (db *DBStore) CreateTable(sqlFilePath string) error {
 	return nil
 
 }
-
-// Interface functions
 
 // SaveCreds saves the user-entered credentials to the database
 func (db *DBStore) SaveCreds(encryptionKey []byte) error {
