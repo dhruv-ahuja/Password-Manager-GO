@@ -14,7 +14,7 @@ import (
 
 func CheckEncryptedData(encInfoPath string) bool {
 
-	// Check for file's existence, returns an error if unable to open
+	// Check for file's existance, returns an error if unable to open
 	checkFile, err := os.Open(encInfoPath)
 
 	if err != nil {
@@ -23,10 +23,10 @@ func CheckEncryptedData(encInfoPath string) bool {
 
 	defer checkFile.Close()
 
-	isEmpty, err := checkFile.Read(make([]byte, 64))
+	readBytes, err := checkFile.Read(make([]byte, 64))
 
 	// If not, return false since either the file has been tampered with
-	if err != nil || isEmpty == 0 {
+	if err != nil || readBytes == 0 {
 		return false
 	}
 
@@ -47,10 +47,10 @@ func CheckMasterPassword(pwFilePath string) bool {
 	defer checkFile.Close()
 
 	// Read file to confirm there are 32 bytes of the hashed master password
-	isEmpty, err := checkFile.Read(make([]byte, 32))
+	readBytes, err := checkFile.Read(make([]byte, 32))
 
 	// If not, return false since either the file has been tampered with
-	if err != nil || isEmpty == 0 {
+	if err != nil || readBytes == 0 {
 		return false
 	}
 
