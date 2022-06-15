@@ -111,7 +111,7 @@ func AuthorizeUser(pwFilePath string, values [][]byte) error {
 	for {
 
 		// Take user input
-		prompt := "Enter the Master Password: "
+		prompt := "\nEnter the Master Password:"
 		usrPassword := store.GetPassInput(prompt)
 		// convert the received slice of bytes to string
 		usrInput := string(usrPassword)

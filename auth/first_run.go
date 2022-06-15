@@ -28,7 +28,7 @@ Set a secure password and remember it since there will be no way to recover it!
 
 	for {
 
-		prompt := "Enter desired Master Password(should contain a combination of atleast 1 lowercase, 1 uppercase letter and a number; minimum length: 8 characters): "
+		prompt := "Enter desired Master Password (should contain a combination of atleast 1 lowercase, 1 uppercase letter and a number;minimum length: 8 characters):"
 
 		usrPassword := store.GetPassInput(prompt)
 		usrInput = string(usrPassword)
@@ -104,7 +104,7 @@ func SaveMasterPassword(pwFilePath string, hashedMasterPassword []byte) error {
 		return err
 	}
 
-	fmt.Println("\nSuccessfully saved master password to file! Now you will be asked to enter it each time you run the program.")
+	fmt.Println("\n\nSuccessfully saved master password to file! Now you will be asked to enter it each time you run the program.")
 
 	return nil
 
