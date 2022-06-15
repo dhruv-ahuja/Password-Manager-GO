@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/good-times-ahead/password-manager-go/auth"
 	"github.com/good-times-ahead/password-manager-go/store"
@@ -25,7 +26,17 @@ func (p *Program) Init(pwFilePath, encInfoPath, sqlFilePath string) error {
 
 	if !checkEncData {
 
-		if err := p.store.CreateTable(sqlFilePath); err != nil {
+		// running the drop table migration first to ensure consistency
+		migrateDown := exec.Command("make", "migratedown")
+		err := migrateDown.Run()
+		if err != nil {
+			return err
+		}
+
+		// now running the migration to create the table
+		migrateUp := exec.Command("make", "migrateup")
+		err = migrateUp.Run()
+		if err != nil {
 			return err
 		}
 
