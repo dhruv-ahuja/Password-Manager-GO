@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupForTests() (*sql.DB, sqlmock.Sqlmock, *mockStore) {
+func setupForTests() (*sql.DB, sqlmock.Sqlmock, Store) {
 	// generates a mock *sql.DB connection to use for testing
 	db, mock, err := sqlmock.New()
 
@@ -19,28 +19,10 @@ func setupForTests() (*sql.DB, sqlmock.Sqlmock, *mockStore) {
 		log.Fatalf("An error encountered when generating new mock connection: %s", err)
 	}
 
-	ms := newMockStore(db)
+	var store Store
+	store = newMockStore(db)
 
-	return db, mock, ms
-}
-
-func TestSaveCreds(t *testing.T) {
-
-	db, mock, ms := setupForTests()
-	defer db.Close()
-
-	mock.ExpectExec("INSERT INTO info").
-		WithArgs("reddit", "test123").
-		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	if err := ms.SaveCreds([]byte("ok")); err != nil {
-		t.Errorf("error when running func: %s", err)
-	}
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("unfulfilled expectations: %s", err)
-	}
-
+	return db, mock, store
 }
 
 func TestRetrieveCreds(t *testing.T) {
