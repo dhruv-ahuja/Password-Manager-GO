@@ -255,6 +255,8 @@ func (db *DBStore) DeleteCreds(key string, encryptionKey []byte) error {
 
 	if len(credList) == 0 {
 		return nil
+	} else {
+		printEntries(credList)
 	}
 
 	selectID := false
