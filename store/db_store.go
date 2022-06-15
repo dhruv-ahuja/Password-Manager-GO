@@ -53,31 +53,6 @@ func NewDBStore() (*DBStore, error) {
 
 }
 
-// CreateTable creates the table to be used for our database-related operations
-func (db *DBStore) CreateTable(sqlFilePath string) error {
-
-	fmt.Println("First-time execution; creating table...")
-
-	// Read the file content
-	query, err := os.ReadFile(sqlFilePath)
-
-	if err != nil {
-		fmt.Println("unable to read setup.sql file!")
-		return err
-	}
-
-	if _, err := db.Conn.Exec(string(query)); err != nil {
-		fmt.Println("unable to create table!")
-		return err
-	}
-
-	// adding new lines to keep interface clean & readable
-	fmt.Printf("Everything done. You're good to go.\n\n")
-
-	return nil
-
-}
-
 // SaveCreds saves the user-entered credentials to the database
 func (db *DBStore) SaveCreds(encryptionKey []byte) error {
 	// define needed prompts
