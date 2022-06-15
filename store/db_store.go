@@ -161,6 +161,8 @@ func (db *DBStore) EditCreds(key string, encryptionKey []byte) error {
 	if len(credList) == 0 {
 		fmt.Println("No accounts found for that key!")
 		return nil
+	} else {
+		printEntries(credList)
 	}
 
 	selectID := false
